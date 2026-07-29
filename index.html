@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#f5a623">
+<title>Construction Crew — Colors & Letters</title>
+<style>
+  :root{
+    --hi:#ffcc00;
+    --dark:#2b2118;
+    --panel:#fff8e7;
+    --shadow:0 8px 0 rgba(0,0,0,.22);
+    /* one knob controls tile size everywhere */
+    --tile:clamp(110px, min(26vw, 34vh), 230px);
+  }
+  /* tall/narrow screens: 3 tiles side by side would be tiny, so let them
+     wrap 2 + 1 and grow instead */
+  @media (max-aspect-ratio: 4/5){
+    :root{ --tile:min(40vw, 26vh); }
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{height:100%;margin:0;overflow:hidden;}
+  body{
+    font-family:"Trebuchet MS","Verdana",system-ui,-apple-system,sans-serif;
+    background:#f5a623;
+    background-image:
+      repeating-linear-gradient(45deg, rgba(0,0,0,.06) 0 28px, rgba(0,0,0,0) 28px 56px);
+    color:var(--dark);
+    user-select:none;-webkit-user-select:none;
+    touch-action:manipulation;
+    display:flex;flex-direction:column;
+    overscroll-behavior:none;
+  }
+  .hazard{height:14px;flex:0 0 14px;
+    background:repeating-linear-gradient(45deg,#111 0 18px,#ffcc00 18px 36px);}
+
+  /* ---------- top bar ---------- */
+  #bar{
+    flex:0 0 auto;display:flex;align-items:center;gap:8px;
+    padding:8px 10px;min-height:56px;
+  }
+  .iconbtn{
+    border:0;background:rgba(0,0,0,.16);color:#fff;
+    font-size:22px;line-height:1;border-radius:14px;
+    width:52px;height:44px;cursor:pointer;
+  }
+  .iconbtn:active{transform:translateY(2px);}
+  /* home + repeat are meaningless on the menu, so hide them there */
+  #bar.atmenu #homeBtn, #bar.atmenu #sayBtn{display:none;}
+  #score{
+    margin-left:auto;display:flex;gap:4px;align-items:center;
+    font-size:clamp(16px,4.4vw,24px);letter-spacing:1px;min-height:30px;
+    white-space:nowrap;overflow:hidden;
+  }
+
+  /* ---------- screens ---------- */
+  #stage{flex:1 1 auto;position:relative;overflow:hidden;}
+  .screen{
+    position:absolute;inset:0;display:none;
+    flex-direction:column;align-items:center;justify-content:center;
+    padding:4px 12px 12px;
+  }
+  .screen.on{display:flex;}
+
+  /* ---------- menu ---------- */
+  #title{
+    font-size:clamp(30px,8vw,64px);font-weight:900;color:#fff;
+    text-shadow:0 4px 0 rgba(0,0,0,.28);text-align:center;line-height:1.05;
+    margin-bottom:4px;
+  }
+  #subtitle{font-size:clamp(14px,3.4vw,22px);color:#3d2d19;margin-bottom:22px;opacity:.85;}
+  .menuwrap{display:flex;gap:18px;flex-wrap:wrap;justify-content:center;}
+  .bigbtn{
+    border:0;cursor:pointer;border-radius:28px;
+    background:var(--panel);box-shadow:var(--shadow);
+    padding:22px 26px;min-width:min(42vw,240px);
+    display:flex;flex-direction:column;align-items:center;gap:6px;
+    font-family:inherit;color:var(--dark);
+  }
+  .bigbtn:active{transform:translateY(5px);box-shadow:0 3px 0 rgba(0,0,0,.22);}
+  .bigbtn .ico{font-size:clamp(44px,11vw,80px);line-height:1;}
+  .bigbtn .lbl{font-size:clamp(20px,5vw,32px);font-weight:900;letter-spacing:1px;}
+
+  /* ---------- play ---------- */
+  #prompt{
+    flex:0 0 auto;text-align:center;margin-bottom:10px;
+    display:flex;align-items:center;gap:10px;justify-content:center;flex-wrap:wrap;
+  }
+  #promptText{
+    font-size:clamp(22px,6.2vw,44px);font-weight:900;color:#fff;
+    text-shadow:0 3px 0 rgba(0,0,0,.3);
+  }
+  #promptText .target{
+    display:inline-block;background:#fff;color:var(--dark);
+    padding:2px 16px;border-radius:14px;text-shadow:none;
+    box-shadow:0 4px 0 rgba(0,0,0,.22);
+  }
+  #choices{
+    flex:1 1 auto;width:100%;display:flex;align-items:center;justify-content:center;
+    gap:clamp(10px,3vw,28px);flex-wrap:wrap;align-content:center;
+  }
+  .choice{
+    border:0;padding:0;cursor:pointer;background:transparent;
+    display:flex;align-items:center;justify-content:center;
+    width:var(--tile);height:var(--tile);
+    border-radius:30px;position:relative;
+    box-shadow:0 8px 0 rgba(0,0,0,.25);
+    transition:transform .12s ease;
+    font-family:inherit;
+  }
+  .choice:active{transform:translateY(4px) scale(.98);}
+  /* the emoji is drained of its own colour so the TILE colour is the only
+     colour in play — otherwise a green tractor on a yellow tile teaches
+     the wrong thing. */
+  .choice .emo{
+    font-size:calc(var(--tile) * .52);line-height:1;
+    filter:grayscale(1) contrast(.85) brightness(1.35)
+           drop-shadow(0 3px 2px rgba(0,0,0,.45));
+    opacity:.95;
+    pointer-events:none;
+  }
+  .choice .letter{
+    font-size:calc(var(--tile) * .62);font-weight:900;line-height:1;
+    color:#1b1b1b;pointer-events:none;
+    text-shadow:0 3px 0 rgba(255,255,255,.55);
+  }
+  .choice .cap{
+    position:absolute;top:-14px;left:50%;transform:translateX(-50%);
+    font-size:26px;pointer-events:none;
+  }
+  .choice.wrong{animation:shake .45s;}
+  .choice.right{animation:pop .5s;z-index:5;}
+  .choice.fade{opacity:.28;transition:opacity .3s;}
+  @keyframes shake{
+    0%,100%{transform:translateX(0)}
+    20%{transform:translateX(-12px) rotate(-4deg)}
+    40%{transform:translateX(12px) rotate(4deg)}
+    60%{transform:translateX(-8px) rotate(-3deg)}
+    80%{transform:translateX(8px) rotate(3deg)}
+  }
+  @keyframes pop{
+    0%{transform:scale(1)}45%{transform:scale(1.22) rotate(-3deg)}100%{transform:scale(1)}
+  }
+
+  /* ---------- build progress ---------- */
+  #site{
+    flex:0 0 auto;height:58px;width:100%;max-width:620px;
+    display:flex;align-items:flex-end;justify-content:center;gap:6px;
+    margin-top:6px;
+  }
+  .brick{
+    width:44px;height:26px;border-radius:6px;background:rgba(255,255,255,.22);
+    border:3px dashed rgba(255,255,255,.4);
+  }
+  .brick.filled{
+    background:#c0392b;border:3px solid #8e2b20;
+    box-shadow:inset 0 -6px 0 rgba(0,0,0,.15);
+    animation:drop .4s ease-out;
+  }
+  @keyframes drop{0%{transform:translateY(-60px);opacity:0}100%{transform:none;opacity:1}}
+
+  /* ---------- celebration ---------- */
+  #cheer{
+    position:absolute;inset:0;display:none;
+    flex-direction:column;align-items:center;justify-content:center;
+    background:rgba(0,0,0,.45);z-index:20;text-align:center;
+  }
+  #cheer.on{display:flex;}
+  #cheerText{
+    font-size:clamp(30px,9vw,68px);font-weight:900;color:#fff;
+    text-shadow:0 5px 0 rgba(0,0,0,.35);
+  }
+  #cheerEmo{
+    font-size:clamp(70px,20vw,150px);line-height:1.35;
+    margin-bottom:6px;animation:pop .6s;
+  }
+  .confetti{
+    position:absolute;width:14px;height:20px;border-radius:3px;
+    top:-30px;z-index:30;pointer-events:none;
+  }
+  #truck{
+    position:absolute;bottom:6px;left:-140px;font-size:clamp(48px,13vw,90px);
+    z-index:25;pointer-events:none;display:none;
+  }
+  #truck.go{display:block;animation:drive 2.6s linear;}
+  @keyframes drive{
+    from{left:-140px} to{left:110%}
+  }
+  .hint{
+    position:absolute;bottom:8px;left:0;right:0;text-align:center;
+    font-size:13px;color:rgba(0,0,0,.45);
+  }
+</style>
+</head>
+<body>
+<div class="hazard"></div>
+
+<div id="bar">
+  <button class="iconbtn" id="homeBtn" aria-label="Back to menu" title="Menu">🏠</button>
+  <button class="iconbtn" id="sayBtn" aria-label="Say it again" title="Say it again">🔁</button>
+  <button class="iconbtn" id="muteBtn" aria-label="Sound on or off" title="Sound">🔊</button>
+  <div id="score"></div>
+</div>
+
+<div id="stage">
+
+  <!-- MENU -->
+  <section class="screen on" id="menuScreen">
+    <div id="title">🚧 CONSTRUCTION CREW 🚧</div>
+    <div id="subtitle">Pick a job, boss!</div>
+    <div class="menuwrap">
+      <button class="bigbtn" data-mode="colors">
+        <span class="ico">🎨</span><span class="lbl">COLORS</span>
+      </button>
+      <button class="bigbtn" data-mode="letters">
+        <span class="ico">🔤</span><span class="lbl">LETTERS</span>
+      </button>
+    </div>
+    <div class="hint">Tap a button to start · 🔊 turns the voice on and off</div>
+  </section>
+
+  <!-- PLAY -->
+  <section class="screen" id="playScreen">
+    <div id="prompt"><div id="promptText"></div></div>
+    <div id="choices"></div>
+    <div id="site"></div>
+  </section>
+
+  <div id="cheer">
+    <div id="cheerEmo">🎉</div>
+    <div id="cheerText">GREAT JOB!</div>
+  </div>
+  <div id="truck">🚚</div>
+</div>
+
+<div class="hazard"></div>
+
+<script>
+(function(){
+"use strict";
+
+/* ============================================================
+   DATA
+   ============================================================ */
+var COLORS = [
+  {name:"RED",    say:"red",    hex:"#e03131", text:"#fff"},
+  {name:"BLUE",   say:"blue",   hex:"#1c7ed6", text:"#fff"},
+  {name:"YELLOW", say:"yellow", hex:"#fcc419", text:"#3b2f00"},
+  {name:"GREEN",  say:"green",  hex:"#2f9e44", text:"#fff"},
+  {name:"ORANGE", say:"orange", hex:"#f76707", text:"#fff"},
+  {name:"PURPLE", say:"purple", hex:"#8e44ad", text:"#fff"},
+  {name:"PINK",   say:"pink",   hex:"#f06595", text:"#fff"},
+  {name:"BROWN",  say:"brown",  hex:"#8b5a2b", text:"#fff"}
+];
+
+/* emoji drawn on the coloured panels. picked to read well at large size */
+var VEHICLES = [
+  {emo:"🚚", say:"truck"},
+  {emo:"🚜", say:"digger"},
+  {emo:"🏗️", say:"crane"},
+  {emo:"🛻", say:"pickup truck"},
+  {emo:"🚧", say:"barrier"},
+  {emo:"⛑️", say:"helmet"},
+  {emo:"🔨", say:"hammer"},
+  {emo:"🪣", say:"bucket"}
+];
+
+var LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+/* letters that look alike in blocky caps — avoid pairing them as distractors */
+var LOOKALIKE = [["E","F"],["M","N"],["M","W"],["O","Q"],["P","R"],["V","W"],["I","T"],["C","G"],["U","V"],["B","D"]];
+
+var SIGN_COLORS = ["#fcc419","#ffa94d","#ffd43b","#f8f0d8","#ffe066"];
+var CHEERS = ["GREAT JOB!","YOU GOT IT!","NICE WORK!","AWESOME!","WELL DONE!","SUPER!"];
+var CHEER_EMO = ["🎉","⭐","🏆","👷","🎊","💪"];
+
+var BRICKS_PER_LEVEL = 5;
+
+/* ============================================================
+   STATE
+   ============================================================ */
+var state = {
+  mode:null,           /* "colors" | "letters" */
+  target:null,
+  choices:[],
+  bricks:0,
+  stars:0,
+  locked:false,
+  muted:false,
+  lastTarget:null
+};
+
+/* ============================================================
+   DOM
+   ============================================================ */
+var $ = function(id){ return document.getElementById(id); };
+var menuScreen=$("menuScreen"), playScreen=$("playScreen");
+var choicesEl=$("choices"), promptEl=$("promptText"), siteEl=$("site"),
+    scoreEl=$("score"), cheerEl=$("cheer"), cheerText=$("cheerText"),
+    cheerEmo=$("cheerEmo"), truckEl=$("truck"), stage=$("stage");
+
+/* ============================================================
+   HELPERS
+   ============================================================ */
+function rnd(n){ return Math.floor(Math.random()*n); }
+function pick(arr){ return arr[rnd(arr.length)]; }
+function shuffle(a){
+  var i,j,t;
+  for(i=a.length-1;i>0;i--){ j=rnd(i+1); t=a[i]; a[i]=a[j]; a[j]=t; }
+  return a;
+}
+function looksAlike(a,b){
+  for(var i=0;i<LOOKALIKE.length;i++){
+    var p=LOOKALIKE[i];
+    if((p[0]===a&&p[1]===b)||(p[1]===a&&p[0]===b)) return true;
+  }
+  return false;
+}
+
+/* ============================================================
+   SOUND — Web Audio for chimes, speechSynthesis for the voice.
+   Both are standard browser APIs; no files to host.
+   ============================================================ */
+var actx=null;
+function audio(){
+  if(actx) return actx;
+  var C = window.AudioContext || window.webkitAudioContext;
+  if(!C) return null;
+  try{ actx = new C(); }catch(e){ actx=null; }
+  return actx;
+}
+function tone(freq,start,dur,type,vol){
+  var a=audio(); if(!a||state.muted) return;
+  try{
+    var o=a.createOscillator(), g=a.createGain();
+    o.type=type||"sine"; o.frequency.value=freq;
+    o.connect(g); g.connect(a.destination);
+    var t=a.currentTime+start;
+    g.gain.setValueAtTime(0.0001,t);
+    g.gain.exponentialRampToValueAtTime(vol||0.22,t+0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+    o.start(t); o.stop(t+dur+0.05);
+  }catch(e){}
+}
+function sfxGood(){ tone(523.25,0,.18,"triangle",.25); tone(659.25,.10,.18,"triangle",.25); tone(783.99,.20,.3,"triangle",.25); }
+function sfxNope(){ tone(196,0,.16,"sawtooth",.12); tone(155,.10,.22,"sawtooth",.12); }
+function sfxLevel(){
+  var notes=[523.25,659.25,783.99,1046.5];
+  for(var i=0;i<notes.length;i++) tone(notes[i],i*0.13,.3,"triangle",.25);
+}
+
+var voices=[];
+function loadVoices(){
+  if(!("speechSynthesis" in window)) return;
+  try{ voices = window.speechSynthesis.getVoices()||[]; }catch(e){ voices=[]; }
+}
+if("speechSynthesis" in window){
+  loadVoices();
+  try{ window.speechSynthesis.onvoiceschanged = loadVoices; }catch(e){}
+}
+function bestVoice(){
+  if(!voices.length) return null;
+  var i,v;
+  /* prefer an en-GB/en-US local voice; falls back to whatever exists */
+  for(i=0;i<voices.length;i++){
+    v=voices[i];
+    if(v.lang && v.lang.indexOf("en")===0 && v.localService) return v;
+  }
+  for(i=0;i<voices.length;i++){
+    v=voices[i];
+    if(v.lang && v.lang.indexOf("en")===0) return v;
+  }
+  return voices[0];
+}
+function say(text){
+  if(state.muted) return;
+  if(!("speechSynthesis" in window)) return;
+  try{
+    window.speechSynthesis.cancel();
+    var u = new SpeechSynthesisUtterance(text);
+    var v = bestVoice(); if(v) u.voice=v;
+    u.rate = 0.85;   /* slow, for little ears */
+    u.pitch = 1.15;
+    u.volume = 1;
+    window.speechSynthesis.speak(u);
+  }catch(e){}
+}
+/* iOS/Safari will not speak unless speech was first started inside a real
+   tap handler. This primes it on the very first touch. */
+var primed=false;
+function primeSpeech(){
+  if(primed) return; primed=true;
+  var a=audio(); if(a && a.state==="suspended"){ try{ a.resume(); }catch(e){} }
+  if(!("speechSynthesis" in window)) return;
+  try{
+    var u=new SpeechSynthesisUtterance(" ");
+    u.volume=0; window.speechSynthesis.speak(u);
+  }catch(e){}
+}
+document.addEventListener("pointerdown", primeSpeech, {once:true});
+
+/* ============================================================
+   SCREENS
+   ============================================================ */
+function show(el){
+  menuScreen.classList.remove("on");
+  playScreen.classList.remove("on");
+  el.classList.add("on");
+  var bar=$("bar");
+  if(el===menuScreen) bar.classList.add("atmenu");
+  else bar.classList.remove("atmenu");
+}
+function goMenu(){
+  try{ if("speechSynthesis" in window) window.speechSynthesis.cancel(); }catch(e){}
+  state.mode=null; state.locked=false;
+  show(menuScreen);
+  renderScore(); renderSite();
+}
+
+/* ============================================================
+   SCORE + BUILD SITE
+   ============================================================ */
+function renderScore(){
+  var s="";
+  for(var i=0;i<Math.min(state.stars,5);i++) s+="⭐";
+  if(state.stars>5) s+=" ×"+state.stars;
+  scoreEl.textContent = state.mode ? s : "";
+}
+function renderSite(){
+  siteEl.innerHTML="";
+  if(!state.mode) return;
+  for(var i=0;i<BRICKS_PER_LEVEL;i++){
+    var b=document.createElement("div");
+    b.className="brick"+(i<state.bricks?" filled":"");
+    siteEl.appendChild(b);
+  }
+}
+
+/* ============================================================
+   ROUND BUILDING
+   ============================================================ */
+function newRound(){
+  state.locked=false;
+  choicesEl.innerHTML="";
+  if(state.mode==="colors") buildColorRound();
+  else buildLetterRound();
+  renderSite();
+  renderScore();
+}
+
+function buildColorRound(){
+  var pool = COLORS.slice();
+  /* don't repeat the same target twice in a row */
+  if(state.lastTarget && pool.length>3){
+    pool = pool.filter(function(c){ return c.name!==state.lastTarget; });
+  }
+  var target = pick(pool);
+  state.lastTarget = target.name;
+
+  var others = COLORS.filter(function(c){ return c.name!==target.name; });
+  shuffle(others);
+  var set = shuffle([target, others[0], others[1]]);
+
+  /* one vehicle for the whole round, so colour is the only difference */
+  var veh = pick(VEHICLES);
+
+  state.target = target.name;
+  promptEl.innerHTML = 'Find the <span class="target" style="background:'+target.hex+';color:'+target.text+'">'+target.name+'</span> '+veh.say.toUpperCase()+'!';
+  say("Find the " + target.say + " " + veh.say);
+
+  set.forEach(function(c){
+    var b=document.createElement("button");
+    b.className="choice";
+    b.style.background=c.hex;
+    b.setAttribute("aria-label",c.name);
+    b.dataset.val=c.name;
+    b.innerHTML='<span class="emo">'+veh.emo+'</span>';
+    b.addEventListener("click", onPick);
+    choicesEl.appendChild(b);
+  });
+}
+
+function buildLetterRound(){
+  var pool = LETTERS.slice();
+  if(state.lastTarget) pool = pool.filter(function(l){ return l!==state.lastTarget; });
+  var target = pick(pool);
+  state.lastTarget = target;
+
+  var others=[], guard=0;
+  while(others.length<2 && guard<400){
+    guard++;
+    var cand = pick(LETTERS);
+    if(cand===target) continue;
+    if(others.indexOf(cand)>-1) continue;
+    if(looksAlike(cand,target)) continue;
+    var clash=false;
+    for(var i=0;i<others.length;i++){ if(looksAlike(cand,others[i])) clash=true; }
+    if(clash) continue;
+    others.push(cand);
+  }
+  /* safety net if the filters were too strict */
+  while(others.length<2){
+    var f=pick(LETTERS);
+    if(f!==target && others.indexOf(f)===-1) others.push(f);
+  }
+
+  var set = shuffle([target, others[0], others[1]]);
+  state.target = target;
+
+  promptEl.innerHTML = 'Find the letter <span class="target">'+target+'</span>';
+  say("Find the letter " + target);
+
+  var caps=["🚧","⛑️","🦺"];
+  set.forEach(function(L,i){
+    var b=document.createElement("button");
+    b.className="choice";
+    b.style.background=SIGN_COLORS[i%SIGN_COLORS.length];
+    b.setAttribute("aria-label","Letter "+L);
+    b.dataset.val=L;
+    b.innerHTML='<span class="cap">'+caps[i%caps.length]+'</span><span class="letter">'+L+'</span>';
+    b.addEventListener("click", onPick);
+    choicesEl.appendChild(b);
+  });
+}
+
+function repeatPrompt(){
+  if(!state.mode || !state.target) return;
+  if(state.mode==="letters"){ say("Find the letter " + state.target); return; }
+  var c=null;
+  for(var i=0;i<COLORS.length;i++){ if(COLORS[i].name===state.target) c=COLORS[i]; }
+  say("Find the " + (c? c.say : state.target));
+}
+
+/* ============================================================
+   ANSWER HANDLING
+   ============================================================ */
+function onPick(ev){
+  if(state.locked) return;
+  var btn = ev.currentTarget;
+  var val = btn.dataset.val;
+
+  if(val !== state.target){
+    /* wrong: no penalty, no scary feedback — just a wobble and a nudge */
+    btn.classList.remove("wrong");
+    void btn.offsetWidth;
+    btn.classList.add("wrong");
+    sfxNope();
+    say("Try again");
+    return;
+  }
+
+  state.locked = true;
+  btn.classList.add("right");
+  var kids = choicesEl.children;
+  for(var i=0;i<kids.length;i++){ if(kids[i]!==btn) kids[i].classList.add("fade"); }
+
+  sfxGood();
+  state.stars++;
+  state.bricks++;
+  renderScore();
+  renderSite();
+  confetti(14);
+  say(pick(["Yes!","Nice work!","You got it!","Great job!"]));
+
+  if(state.bricks >= BRICKS_PER_LEVEL){
+    setTimeout(levelUp, 900);
+  } else {
+    setTimeout(newRound, 1300);
+  }
+}
+
+function levelUp(){
+  state.bricks = 0;
+  cheerEmo.textContent = pick(CHEER_EMO);
+  cheerText.textContent = pick(CHEERS);
+  cheerEl.classList.add("on");
+  sfxLevel();
+  confetti(40);
+  truckEl.classList.remove("go"); void truckEl.offsetWidth; truckEl.classList.add("go");
+  say(pick(["You built it! Great job!","Wow! The whole crew is proud!","You finished the building!"]));
+  setTimeout(function(){
+    cheerEl.classList.remove("on");
+    truckEl.classList.remove("go");
+    newRound();
+  }, 2800);
+}
+
+/* ============================================================
+   CONFETTI
+   ============================================================ */
+var CONF_COLORS=["#e03131","#1c7ed6","#fcc419","#2f9e44","#f76707","#8e44ad","#f06595","#ffffff"];
+function confetti(n){
+  var w = stage.clientWidth || window.innerWidth;
+  for(var i=0;i<n;i++){
+    (function(){
+      var d=document.createElement("div");
+      d.className="confetti";
+      d.style.background = pick(CONF_COLORS);
+      d.style.left = rnd(w) + "px";
+      d.style.transform = "rotate("+rnd(360)+"deg)";
+      stage.appendChild(d);
+      var dur = 1400 + rnd(1200);
+      var drift = (rnd(140)-70);
+      try{
+        var anim = d.animate([
+          {transform:"translate(0,0) rotate(0deg)", opacity:1},
+          {transform:"translate("+drift+"px,"+(stage.clientHeight+80)+"px) rotate("+(360+rnd(540))+"deg)", opacity:.9}
+        ], {duration:dur, easing:"cubic-bezier(.3,.6,.6,1)"});
+        anim.onfinish = function(){ if(d.parentNode) d.parentNode.removeChild(d); };
+      }catch(e){
+        /* Element.animate missing (very old browser): just clean up */
+        setTimeout(function(){ if(d.parentNode) d.parentNode.removeChild(d); }, dur);
+      }
+      setTimeout(function(){ if(d.parentNode) d.parentNode.removeChild(d); }, dur+400);
+    })();
+  }
+}
+
+/* ============================================================
+   WIRING
+   ============================================================ */
+Array.prototype.forEach.call(document.querySelectorAll(".bigbtn"), function(b){
+  b.addEventListener("click", function(){
+    primeSpeech();
+    state.mode = b.dataset.mode;
+    state.bricks = 0; state.stars = 0; state.lastTarget = null;
+    show(playScreen);
+    tone(660,0,.15,"triangle",.2);
+    setTimeout(newRound, 120);
+  });
+});
+
+$("homeBtn").addEventListener("click", goMenu);
+$("sayBtn").addEventListener("click", function(){ primeSpeech(); repeatPrompt(); });
+$("muteBtn").addEventListener("click", function(){
+  state.muted = !state.muted;
+  this.textContent = state.muted ? "🔇" : "🔊";
+  if(state.muted){
+    try{ if("speechSynthesis" in window) window.speechSynthesis.cancel(); }catch(e){}
+  } else {
+    primeSpeech();
+    repeatPrompt();
+  }
+});
+
+$("bar").classList.add("atmenu");
+
+/* stop pinch-zoom + double-tap zoom from wrecking the layout mid-game */
+document.addEventListener("gesturestart", function(e){ e.preventDefault(); });
+var lastTouch=0;
+document.addEventListener("touchend", function(e){
+  var now=Date.now();
+  if(now-lastTouch<320) e.preventDefault();
+  lastTouch=now;
+}, {passive:false});
+
+/* expose a tiny hook so the page can be smoke-tested automatically */
+window.__game = {
+  state: state,
+  correctSelector: function(){ return '.choice[data-val="'+ (state.target||"") +'"]'; }
+};
+
+})();
+</script>
+</body>
+</html>
