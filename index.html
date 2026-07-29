@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#f5a623">
-<title>Construction Crew — Colors & Letters</title>
+<title>Construction Crew — Colors, Letters & Numbers</title>
 <style>
   :root{
     --hi:#ffcc00;
@@ -67,16 +67,17 @@
 
   /* ---------- menu ---------- */
   #title{
-    font-size:clamp(30px,8vw,64px);font-weight:900;color:#fff;
-    text-shadow:0 4px 0 rgba(0,0,0,.28);text-align:center;line-height:1.05;
-    margin-bottom:4px;
+    /* sized so the whole line, emoji included, never wraps */
+    font-size:clamp(18px,5.9vw,54px);font-weight:900;color:#fff;
+    text-shadow:0 4px 0 rgba(0,0,0,.28);text-align:center;line-height:1.1;
+    margin-bottom:4px;white-space:nowrap;
   }
   #subtitle{font-size:clamp(14px,3.4vw,22px);color:#3d2d19;margin-bottom:22px;opacity:.85;}
   .menuwrap{display:flex;gap:18px;flex-wrap:wrap;justify-content:center;}
   .bigbtn{
     border:0;cursor:pointer;border-radius:28px;
     background:var(--panel);box-shadow:var(--shadow);
-    padding:22px 26px;min-width:min(42vw,240px);
+    padding:20px 22px;min-width:min(40vw,220px);
     display:flex;flex-direction:column;align-items:center;gap:6px;
     font-family:inherit;color:var(--dark);
   }
@@ -99,7 +100,7 @@
     box-shadow:0 4px 0 rgba(0,0,0,.22);
   }
   #choices{
-    flex:1 1 auto;width:100%;display:flex;align-items:center;justify-content:center;
+    flex:1 1 auto;min-height:0;width:100%;display:flex;align-items:center;justify-content:center;
     gap:clamp(10px,3vw,28px);flex-wrap:wrap;align-content:center;
   }
   .choice{
@@ -126,6 +127,22 @@
     font-size:calc(var(--tile) * .62);font-weight:900;line-height:1;
     color:#1b1b1b;pointer-events:none;
     text-shadow:0 3px 0 rgba(255,255,255,.55);
+  }
+  /* "10" is two glyphs wide — shrink so it can't crowd the tile edges */
+  .choice .letter.two{ font-size:calc(var(--tile) * .42); letter-spacing:-2px; }
+
+  /* row of things to count, shown above the choices in counting rounds */
+  #countBox{
+    flex:0 0 auto;display:none;flex-wrap:wrap;gap:2px 6px;
+    align-items:center;justify-content:center;
+    max-width:min(96vw,760px);margin:0 auto 8px;
+    background:rgba(255,255,255,.22);border-radius:22px;
+    padding:8px 14px;
+  }
+  #countBox.on{display:flex;}
+  #countBox span{
+    font-size:clamp(30px,7.5vw,60px);line-height:1.05;
+    filter:drop-shadow(0 2px 1px rgba(0,0,0,.3));
   }
   .choice .cap{
     position:absolute;top:-14px;left:50%;transform:translateX(-50%);
@@ -191,8 +208,40 @@
   }
   .hint{
     position:absolute;bottom:8px;left:0;right:0;text-align:center;
-    font-size:13px;color:rgba(0,0,0,.45);
+    font-size:13px;color:rgba(0,0,0,.45);padding:0 10px;
   }
+
+  /* Short screens — mainly a phone held sideways. Everything has to shrink
+     together or the prompt gets clipped behind the top bar and the brick
+     row falls off the bottom. */
+  @media (max-height: 500px){
+    :root{ --tile:min(21vw, 40vh); }
+    #bar{ min-height:42px; padding:4px 8px; }
+    .iconbtn{ height:36px;width:46px;font-size:19px; }
+    #promptText{ font-size:clamp(17px,4.2vw,26px); }
+    #prompt{ margin-bottom:4px; }
+    #countBox{ padding:4px 10px;margin-bottom:4px;border-radius:16px; }
+    #countBox span{ font-size:clamp(19px,4.4vw,32px); }
+    #site{ height:24px; }
+    .brick{ width:32px;height:13px;border-width:2px; }
+    #title{ font-size:clamp(18px,5vw,38px);margin-bottom:0; }
+    #subtitle{ margin-bottom:10px; }
+    /* menu buttons go icon-beside-label so all three sit on one row */
+    .menuwrap{ gap:10px; }
+    .bigbtn{ flex-direction:row;gap:10px;padding:10px 16px;min-width:0;border-radius:20px; }
+    .bigbtn .ico{ font-size:clamp(24px,5.2vw,34px); }
+    .bigbtn .lbl{ font-size:clamp(15px,3.6vw,22px); }
+    #voiceBtn{ margin-top:10px; }
+    .hint{ display:none; }
+  }
+  /* grown-up control: cycle the speaking voice. menu only. */
+  #voiceBtn{
+    margin-top:18px;border:0;cursor:pointer;font-family:inherit;
+    background:rgba(0,0,0,.14);color:#4a3517;
+    border-radius:999px;padding:8px 16px;font-size:13px;font-weight:700;
+    max-width:90vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  }
+  #voiceBtn:active{transform:translateY(2px);}
 </style>
 </head>
 <body>
@@ -218,13 +267,18 @@
       <button class="bigbtn" data-mode="letters">
         <span class="ico">🔤</span><span class="lbl">LETTERS</span>
       </button>
+      <button class="bigbtn" data-mode="numbers">
+        <span class="ico">🔢</span><span class="lbl">NUMBERS</span>
+      </button>
     </div>
+    <button id="voiceBtn" title="Change the speaking voice">🗣️ Voice: checking…</button>
     <div class="hint">Tap a button to start · 🔊 turns the voice on and off</div>
   </section>
 
   <!-- PLAY -->
   <section class="screen" id="playScreen">
     <div id="prompt"><div id="promptText"></div></div>
+    <div id="countBox"></div>
     <div id="choices"></div>
     <div id="site"></div>
   </section>
@@ -268,9 +322,37 @@ var VEHICLES = [
   {emo:"🪣", say:"bucket"}
 ];
 
+/* ---- numbers ----
+   NUMBERS_UP_TO: highest numeral shown (1..this). 10 is a sensible ceiling for 4.
+   COUNTING_ROUNDS: mixes in "how many cones? tap the number" rounds.
+                    set to false for pure numeral recognition only.
+   COUNT_MAX: counting rounds never ask for more than this many objects — past
+              ~6, counting a scattered row is hard for this age. */
+var NUMBERS_UP_TO   = 10;
+var COUNTING_ROUNDS = true;
+var COUNT_MAX       = 6;
+
+var NUM_WORDS = ["zero","one","two","three","four","five","six","seven","eight",
+                 "nine","ten","eleven","twelve","thirteen","fourteen","fifteen",
+                 "sixteen","seventeen","eighteen","nineteen","twenty"];
+
+/* small things that are easy to count, one type per round */
+var COUNTABLES = [
+  {emo:"🚧", say:"barriers"},
+  {emo:"⛑️", say:"helmets"},
+  {emo:"🧱", say:"bricks"},
+  {emo:"🔨", say:"hammers"},
+  {emo:"🪵", say:"logs"},
+  {emo:"🚚", say:"trucks"},
+  {emo:"🪣", say:"buckets"},
+  {emo:"🔩", say:"bolts"}
+];
+
 var LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
 /* letters that look alike in blocky caps — avoid pairing them as distractors */
-var LOOKALIKE = [["E","F"],["M","N"],["M","W"],["O","Q"],["P","R"],["V","W"],["I","T"],["C","G"],["U","V"],["B","D"]];
+var LOOKALIKE = [["E","F"],["M","N"],["M","W"],["O","Q"],["P","R"],["V","W"],["I","T"],["C","G"],["U","V"],["B","D"],
+/* numerals that trip up new readers: 6/9 are rotations, 1/7 and 3/8 are close */
+                 ["6","9"],["1","7"],["3","8"],["2","5"]];
 
 var SIGN_COLORS = ["#fcc419","#ffa94d","#ffd43b","#f8f0d8","#ffe066"];
 var CHEERS = ["GREAT JOB!","YOU GOT IT!","NICE WORK!","AWESOME!","WELL DONE!","SUPER!"];
@@ -282,9 +364,10 @@ var BRICKS_PER_LEVEL = 5;
    STATE
    ============================================================ */
 var state = {
-  mode:null,           /* "colors" | "letters" */
+  mode:null,           /* "colors" | "letters" | "numbers" */
+  roundType:"id",      /* "id" = recognise the symbol, "count" = count objects */
   target:null,
-  choices:[],
+  sayAgain:"",         /* exact phrase the 🔁 button replays */
   bricks:0,
   stars:0,
   locked:false,
@@ -297,7 +380,7 @@ var state = {
    ============================================================ */
 var $ = function(id){ return document.getElementById(id); };
 var menuScreen=$("menuScreen"), playScreen=$("playScreen");
-var choicesEl=$("choices"), promptEl=$("promptText"), siteEl=$("site"),
+var choicesEl=$("choices"), promptEl=$("promptText"), siteEl=$("site"), countBox=$("countBox"),
     scoreEl=$("score"), cheerEl=$("cheer"), cheerText=$("cheerText"),
     cheerEmo=$("cheerEmo"), truckEl=$("truck"), stage=$("stage");
 
@@ -360,20 +443,101 @@ if("speechSynthesis" in window){
   loadVoices();
   try{ window.speechSynthesis.onvoiceschanged = loadVoices; }catch(e){}
 }
-function bestVoice(){
-  if(!voices.length) return null;
-  var i,v;
-  /* prefer an en-GB/en-US local voice; falls back to whatever exists */
-  for(i=0;i<voices.length;i++){
-    v=voices[i];
-    if(v.lang && v.lang.indexOf("en")===0 && v.localService) return v;
+/* ---- picking a FEMALE voice ------------------------------------------------
+   Important caveat: the Web Speech API exposes no gender field on a voice.
+   SpeechSynthesisVoice only gives name, lang, voiceURI, localService and
+   default. So "female" has to be inferred from the voice's NAME, which is a
+   heuristic, not a guarantee. Known female voice names across the major
+   platforms are listed below; anything explicitly labelled male is pushed
+   down. If none of them are present on a device, the code falls back to the
+   best English voice available rather than going silent.
+   Set PREFERRED_VOICE_NAME to an exact voice name to override all of this. */
+var PREFERRED_VOICE_NAME = "";
+
+var FEMALE_VOICE_NAMES = [
+  /* Apple (macOS / iOS) */
+  "samantha","karen","moira","tessa","fiona","victoria","allison","ava","susan",
+  "vicki","kathy","serena","nicky","zoe","siri female","joana","catherine",
+  "martha","kate","stephanie","shelley","sandy","grandma",
+  /* Microsoft (Windows / Edge) */
+  "zira","hazel","eva","aria","jenny","michelle","linda","heera","susanna",
+  "catherine","sonia","libby","natasha","clara","emily","olivia","isha","neerja",
+  "ana","yan","molly","mia","amber","ashley","cora","elizabeth","monica","sara",
+  /* Google (Android / Chrome) */
+  "google uk english female","google us english"
+];
+var MALE_VOICE_NAMES = [
+  "alex","daniel","fred","tom","rishi","aaron","arthur","gordon","oliver",
+  "junior","ralph","reed","rocko","eddy","grandpa","jamie","liam","lee",
+  "david","mark","guy","ryan","james","george","albert","bruce","william",
+  "christopher","eric","roger","steffan","brian","thomas","google uk english male"
+];
+
+function voiceScore(v){
+  var name = (v.name||"").toLowerCase();
+  var blob = name + " " + (v.voiceURI||"").toLowerCase();
+  var s = 0, i;
+
+  /* English first — the prompts are English */
+  var lang = (v.lang||"").toLowerCase().replace("_","-");
+  if(lang.indexOf("en")!==0) s -= 500;
+
+  /* explicit labels win. check "female" BEFORE "male", since the word
+     "female" contains "male" as a substring. */
+  var saysFemale = blob.indexOf("female")>-1 || /\bwoman\b/.test(blob);
+  var stripped   = blob.replace(/female/g,"");
+  var saysMale   = /male/.test(stripped) || /\bman\b/.test(stripped);
+  if(saysFemale)      s += 200;
+  else if(saysMale)   s -= 200;
+
+  /* known names, matched as whole words so "ava" doesn't match "available" */
+  var tokens = name.split(/[^a-z]+/).filter(Boolean);
+  function hasName(list){
+    for(var j=0;j<list.length;j++){
+      var target = list[j];
+      if(target.indexOf(" ")>-1){ if(name.indexOf(target)>-1) return true; }
+      else if(tokens.indexOf(target)>-1) return true;
+    }
+    return false;
   }
-  for(i=0;i<voices.length;i++){
-    v=voices[i];
-    if(v.lang && v.lang.indexOf("en")===0) return v;
-  }
-  return voices[0];
+  if(hasName(FEMALE_VOICE_NAMES)) s += 100;
+  if(hasName(MALE_VOICE_NAMES))   s -= 100;
+
+  /* tie-breakers: on-device voices start faster and work offline */
+  if(v.localService) s += 12;
+  if(v.default)      s += 4;
+  if(lang.indexOf("en-us")===0 || lang.indexOf("en-gb")===0) s += 6;
+  return s;
 }
+
+/* exported shape so this is testable without a speech engine present */
+function pickVoiceFrom(list){
+  if(!list || !list.length) return null;
+  var i, best=null, bestScore=-1e9;
+  if(PREFERRED_VOICE_NAME){
+    for(i=0;i<list.length;i++){ if(list[i].name===PREFERRED_VOICE_NAME) return list[i]; }
+  }
+  for(i=0;i<list.length;i++){
+    var sc = voiceScore(list[i]);
+    if(sc>bestScore){ bestScore=sc; best=list[i]; }
+  }
+  return best;
+}
+
+/* index into the English voice list, so a grown-up can cycle voices if the
+   heuristic guessed wrong on their device */
+var voiceOverride = null;
+function englishVoices(){
+  var out = voices.filter(function(v){
+    return (v.lang||"").toLowerCase().indexOf("en")===0;
+  });
+  return out.length ? out : voices;
+}
+function bestVoice(){
+  if(voiceOverride) return voiceOverride;
+  return pickVoiceFrom(voices);
+}
+
 function say(text){
   if(state.muted) return;
   if(!("speechSynthesis" in window)) return;
@@ -381,8 +545,8 @@ function say(text){
     window.speechSynthesis.cancel();
     var u = new SpeechSynthesisUtterance(text);
     var v = bestVoice(); if(v) u.voice=v;
-    u.rate = 0.85;   /* slow, for little ears */
-    u.pitch = 1.15;
+    u.rate  = 0.85;   /* slow, for little ears */
+    u.pitch = 1.25;   /* nudged up: helps a neutral engine read as female */
     u.volume = 1;
     window.speechSynthesis.speak(u);
   }catch(e){}
@@ -423,9 +587,10 @@ function goMenu(){
    SCORE + BUILD SITE
    ============================================================ */
 function renderScore(){
+  /* past five, one star plus a count reads better than a wall of stars */
   var s="";
-  for(var i=0;i<Math.min(state.stars,5);i++) s+="⭐";
-  if(state.stars>5) s+=" ×"+state.stars;
+  if(state.stars>5){ s = "⭐ ×"+state.stars; }
+  else { for(var i=0;i<state.stars;i++) s+="⭐"; }
   scoreEl.textContent = state.mode ? s : "";
 }
 function renderSite(){
@@ -444,10 +609,112 @@ function renderSite(){
 function newRound(){
   state.locked=false;
   choicesEl.innerHTML="";
-  if(state.mode==="colors") buildColorRound();
-  else buildLetterRound();
+  countBox.innerHTML="";
+  countBox.classList.remove("on");
+  state.roundType = "id";
+  if(state.mode==="colors")      buildColorRound();
+  else if(state.mode==="letters") buildLetterRound();
+  else                            buildNumberRound();
   renderSite();
   renderScore();
+}
+
+/* shared: build three sign-style tiles from a list of labels */
+function renderSigns(set, labeller){
+  var caps=["🚧","⛑️","🦺"];
+  set.forEach(function(val,i){
+    var b=document.createElement("button");
+    b.className="choice";
+    b.style.background=SIGN_COLORS[i%SIGN_COLORS.length];
+    b.setAttribute("aria-label", labeller ? labeller(val) : String(val));
+    b.dataset.val=val;
+    var two = String(val).length>1 ? " two" : "";
+    b.innerHTML='<span class="cap">'+caps[i%caps.length]+'</span>'+
+                '<span class="letter'+two+'">'+val+'</span>';
+    b.addEventListener("click", onPick);
+    choicesEl.appendChild(b);
+  });
+}
+
+/* pick two distractors that aren't the target, aren't each other, and
+   aren't visually confusable with either */
+function pickDistractors(pool, target){
+  var others=[], guard=0;
+  while(others.length<2 && guard<600){
+    guard++;
+    var cand = pick(pool);
+    if(cand===target) continue;
+    if(others.indexOf(cand)>-1) continue;
+    if(looksAlike(cand,target)) continue;
+    var clash=false;
+    for(var i=0;i<others.length;i++){ if(looksAlike(cand,others[i])) clash=true; }
+    if(clash) continue;
+    others.push(cand);
+  }
+  /* safety net if the lookalike filters were too strict for a small pool */
+  while(others.length<2){
+    var f=pick(pool);
+    if(f!==target && others.indexOf(f)===-1) others.push(f);
+  }
+  return others;
+}
+
+function buildNumberRound(){
+  var all=[], i;
+  for(i=1;i<=NUMBERS_UP_TO;i++) all.push(String(i));
+
+  /* roughly one round in three is a counting round, when enabled */
+  var counting = COUNTING_ROUNDS && Math.random() < 0.34;
+
+  if(counting){
+    var maxN = Math.min(COUNT_MAX, NUMBERS_UP_TO);
+    var countPool=[];
+    for(i=1;i<=maxN;i++) countPool.push(String(i));
+    var pool = countPool.length>3 && state.lastTarget
+      ? countPool.filter(function(n){ return n!==state.lastTarget; })
+      : countPool;
+
+    var target = pick(pool);
+    state.lastTarget = target;
+    state.target = target;
+    state.roundType = "count";
+
+    var thing = pick(COUNTABLES);
+    countBox.innerHTML="";
+    for(i=0;i<parseInt(target,10);i++){
+      var s=document.createElement("span");
+      s.textContent=thing.emo;
+      countBox.appendChild(s);
+    }
+    countBox.classList.add("on");
+
+    promptEl.innerHTML = 'How many '+thing.say.toUpperCase()+'?';
+    state.sayAgain = "How many " + thing.say + "? Tap the number.";
+    say(state.sayAgain);
+
+    renderSigns(shuffle([target].concat(pickDistractors(all, target))),
+                function(v){ return "Number "+v; });
+    return;
+  }
+
+  var pool2 = all.length>3 && state.lastTarget
+    ? all.filter(function(n){ return n!==state.lastTarget; })
+    : all;
+  var t = pick(pool2);
+  state.lastTarget = t;
+  state.target = t;
+
+  promptEl.innerHTML = 'Find the number <span class="target">'+t+'</span>';
+  state.sayAgain = "Find the number " + numWord(t);
+  say(state.sayAgain);
+
+  renderSigns(shuffle([t].concat(pickDistractors(all, t))),
+              function(v){ return "Number "+v; });
+}
+
+function numWord(n){
+  var i = parseInt(n,10);
+  return (NUM_WORDS[i] !== undefined) ? NUM_WORDS[i] : String(n);
 }
 
 function buildColorRound(){
@@ -468,7 +735,8 @@ function buildColorRound(){
 
   state.target = target.name;
   promptEl.innerHTML = 'Find the <span class="target" style="background:'+target.hex+';color:'+target.text+'">'+target.name+'</span> '+veh.say.toUpperCase()+'!';
-  say("Find the " + target.say + " " + veh.say);
+  state.sayAgain = "Find the " + target.say + " " + veh.say;
+  say(state.sayAgain);
 
   set.forEach(function(c){
     var b=document.createElement("button");
@@ -487,50 +755,19 @@ function buildLetterRound(){
   if(state.lastTarget) pool = pool.filter(function(l){ return l!==state.lastTarget; });
   var target = pick(pool);
   state.lastTarget = target;
-
-  var others=[], guard=0;
-  while(others.length<2 && guard<400){
-    guard++;
-    var cand = pick(LETTERS);
-    if(cand===target) continue;
-    if(others.indexOf(cand)>-1) continue;
-    if(looksAlike(cand,target)) continue;
-    var clash=false;
-    for(var i=0;i<others.length;i++){ if(looksAlike(cand,others[i])) clash=true; }
-    if(clash) continue;
-    others.push(cand);
-  }
-  /* safety net if the filters were too strict */
-  while(others.length<2){
-    var f=pick(LETTERS);
-    if(f!==target && others.indexOf(f)===-1) others.push(f);
-  }
-
-  var set = shuffle([target, others[0], others[1]]);
   state.target = target;
 
   promptEl.innerHTML = 'Find the letter <span class="target">'+target+'</span>';
-  say("Find the letter " + target);
+  state.sayAgain = "Find the letter " + target;
+  say(state.sayAgain);
 
-  var caps=["🚧","⛑️","🦺"];
-  set.forEach(function(L,i){
-    var b=document.createElement("button");
-    b.className="choice";
-    b.style.background=SIGN_COLORS[i%SIGN_COLORS.length];
-    b.setAttribute("aria-label","Letter "+L);
-    b.dataset.val=L;
-    b.innerHTML='<span class="cap">'+caps[i%caps.length]+'</span><span class="letter">'+L+'</span>';
-    b.addEventListener("click", onPick);
-    choicesEl.appendChild(b);
-  });
+  renderSigns(shuffle([target].concat(pickDistractors(LETTERS, target))),
+              function(v){ return "Letter "+v; });
 }
 
 function repeatPrompt(){
-  if(!state.mode || !state.target) return;
-  if(state.mode==="letters"){ say("Find the letter " + state.target); return; }
-  var c=null;
-  for(var i=0;i<COLORS.length;i++){ if(COLORS[i].name===state.target) c=COLORS[i]; }
-  say("Find the " + (c? c.say : state.target));
+  if(!state.mode || !state.sayAgain) return;
+  say(state.sayAgain);
 }
 
 /* ============================================================
@@ -645,6 +882,41 @@ $("muteBtn").addEventListener("click", function(){
   }
 });
 
+/* ---- voice picker (menu only, for grown-ups) ---- */
+var voiceBtn = $("voiceBtn");
+function shortVoiceName(v){
+  if(!v) return "device default";
+  return (v.name||"voice").replace(/\s*[-(].*$/,"").slice(0,28);
+}
+function refreshVoiceBtn(){
+  if(!("speechSynthesis" in window)){
+    voiceBtn.textContent = "🗣️ No voice on this browser";
+    voiceBtn.disabled = true; return;
+  }
+  if(!voices.length){ voiceBtn.textContent = "🗣️ Voice: device default"; return; }
+  voiceBtn.textContent = "🗣️ Voice: " + shortVoiceName(bestVoice()) + "  (tap to change)";
+}
+voiceBtn.addEventListener("click", function(){
+  primeSpeech();
+  var list = englishVoices();
+  if(!list.length){ say("Hello! I am ready to play."); return; }
+  var cur = bestVoice();
+  var idx = list.indexOf(cur);
+  voiceOverride = list[(idx+1) % list.length];
+  refreshVoiceBtn();
+  say("Hello! Find the red truck.");
+});
+refreshVoiceBtn();
+if("speechSynthesis" in window){
+  /* voices often arrive asynchronously, especially on Chrome */
+  try{
+    window.speechSynthesis.addEventListener("voiceschanged", function(){
+      loadVoices(); refreshVoiceBtn();
+    });
+  }catch(e){}
+  setTimeout(function(){ loadVoices(); refreshVoiceBtn(); }, 600);
+}
+
 $("bar").classList.add("atmenu");
 
 /* stop pinch-zoom + double-tap zoom from wrecking the layout mid-game */
@@ -659,7 +931,13 @@ document.addEventListener("touchend", function(e){
 /* expose a tiny hook so the page can be smoke-tested automatically */
 window.__game = {
   state: state,
-  correctSelector: function(){ return '.choice[data-val="'+ (state.target||"") +'"]'; }
+  correctSelector: function(){ return '.choice[data-val="'+ (state.target||"") +'"]'; },
+  /* exposed so voice selection can be tested against mock voice lists —
+     no speech engine is needed to check the picker's logic */
+  pickVoiceFrom: pickVoiceFrom,
+  voiceScore: voiceScore,
+  currentVoiceName: function(){ var v=bestVoice(); return v? v.name : null; },
+  countShown: function(){ return countBox.children.length; }
 };
 
 })();
