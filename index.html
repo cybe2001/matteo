@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-<head> 
+<head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -9,15 +9,12 @@
 <title>Construction Crew — Colors, Letters & Numbers</title>
 <style>
   :root{
-    --hi:#ffcc00;
     --dark:#2b2118;
     --panel:#fff8e7;
     --shadow:0 8px 0 rgba(0,0,0,.22);
-    /* one knob controls tile size everywhere */
     --tile:clamp(110px, min(26vw, 34vh), 230px);
   }
-  /* tall/narrow screens: 3 tiles side by side would be tiny, so let them
-     wrap 2 + 1 and grow instead */
+  /* tall/narrow screens: tiles side by side would be tiny, so let them wrap */
   @media (max-aspect-ratio: 4/5){
     :root{ --tile:min(40vw, 26vh); }
   }
@@ -26,8 +23,7 @@
   body{
     font-family:"Trebuchet MS","Verdana",system-ui,-apple-system,sans-serif;
     background:#f5a623;
-    background-image:
-      repeating-linear-gradient(45deg, rgba(0,0,0,.06) 0 28px, rgba(0,0,0,0) 28px 56px);
+    background-image:repeating-linear-gradient(45deg, rgba(0,0,0,.06) 0 28px, rgba(0,0,0,0) 28px 56px);
     color:var(--dark);
     user-select:none;-webkit-user-select:none;
     touch-action:manipulation;
@@ -38,17 +34,13 @@
     background:repeating-linear-gradient(45deg,#111 0 18px,#ffcc00 18px 36px);}
 
   /* ---------- top bar ---------- */
-  #bar{
-    flex:0 0 auto;display:flex;align-items:center;gap:8px;
-    padding:8px 10px;min-height:56px;
-  }
+  #bar{flex:0 0 auto;display:flex;align-items:center;gap:8px;padding:8px 10px;min-height:56px;}
   .iconbtn{
     border:0;background:rgba(0,0,0,.16);color:#fff;
     font-size:22px;line-height:1;border-radius:14px;
     width:52px;height:44px;cursor:pointer;
   }
   .iconbtn:active{transform:translateY(2px);}
-  /* home + repeat are meaningless on the menu, so hide them there */
   #bar.atmenu #homeBtn, #bar.atmenu #sayBtn{display:none;}
   #score{
     margin-left:auto;display:flex;gap:4px;align-items:center;
@@ -67,13 +59,12 @@
 
   /* ---------- menu ---------- */
   #title{
-    /* sized so the whole line, emoji included, never wraps */
     font-size:clamp(18px,5.9vw,54px);font-weight:900;color:#fff;
     text-shadow:0 4px 0 rgba(0,0,0,.28);text-align:center;line-height:1.1;
     margin-bottom:4px;white-space:nowrap;
   }
-  #subtitle{font-size:clamp(14px,3.4vw,22px);color:#3d2d19;margin-bottom:22px;opacity:.85;}
-  .menuwrap{display:flex;gap:18px;flex-wrap:wrap;justify-content:center;}
+  #subtitle{font-size:clamp(14px,3.4vw,22px);color:#3d2d19;margin-bottom:20px;opacity:.85;}
+  .menuwrap{display:flex;gap:16px;flex-wrap:wrap;justify-content:center;}
   .bigbtn{
     border:0;cursor:pointer;border-radius:28px;
     background:var(--panel);box-shadow:var(--shadow);
@@ -84,14 +75,19 @@
   .bigbtn:active{transform:translateY(5px);box-shadow:0 3px 0 rgba(0,0,0,.22);}
   .bigbtn .ico{font-size:clamp(44px,11vw,80px);line-height:1;}
   .bigbtn .lbl{font-size:clamp(20px,5vw,32px);font-weight:900;letter-spacing:1px;}
+  .grownup{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:18px;}
+  .minibtn{
+    border:0;cursor:pointer;font-family:inherit;
+    background:rgba(0,0,0,.14);color:#4a3517;
+    border-radius:999px;padding:8px 16px;font-size:13px;font-weight:700;
+    max-width:90vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  }
+  .minibtn:active{transform:translateY(2px);}
 
   /* ---------- play ---------- */
-  #prompt{
-    flex:0 0 auto;text-align:center;margin-bottom:10px;
-    display:flex;align-items:center;gap:10px;justify-content:center;flex-wrap:wrap;
-  }
+  #prompt{flex:0 0 auto;text-align:center;margin-bottom:10px;}
   #promptText{
-    font-size:clamp(22px,6.2vw,44px);font-weight:900;color:#fff;
+    font-size:clamp(20px,5.6vw,42px);font-weight:900;color:#fff;
     text-shadow:0 3px 0 rgba(0,0,0,.3);
   }
   #promptText .target{
@@ -109,48 +105,41 @@
     width:var(--tile);height:var(--tile);
     border-radius:30px;position:relative;
     box-shadow:0 8px 0 rgba(0,0,0,.25);
-    transition:transform .12s ease;
+    transition:transform .12s ease, opacity .3s ease;
     font-family:inherit;
   }
+  /* four options need to be a little smaller to stay on screen */
+  #choices.four .choice{ width:calc(var(--tile)*.82); height:calc(var(--tile)*.82); }
   .choice:active{transform:translateY(4px) scale(.98);}
   /* the emoji is drained of its own colour so the TILE colour is the only
      colour in play — otherwise a green tractor on a yellow tile teaches
      the wrong thing. */
   .choice .emo{
     font-size:calc(var(--tile) * .52);line-height:1;
-    filter:grayscale(1) contrast(.85) brightness(1.35)
-           drop-shadow(0 3px 2px rgba(0,0,0,.45));
-    opacity:.95;
-    pointer-events:none;
+    filter:grayscale(1) contrast(.85) brightness(1.35) drop-shadow(0 3px 2px rgba(0,0,0,.45));
+    opacity:.95;pointer-events:none;
   }
+  #choices.four .choice .emo{ font-size:calc(var(--tile) * .43); }
   .choice .letter{
     font-size:calc(var(--tile) * .62);font-weight:900;line-height:1;
     color:#1b1b1b;pointer-events:none;
     text-shadow:0 3px 0 rgba(255,255,255,.55);
   }
-  /* "10" is two glyphs wide — shrink so it can't crowd the tile edges */
+  #choices.four .choice .letter{ font-size:calc(var(--tile) * .5); }
   .choice .letter.two{ font-size:calc(var(--tile) * .42); letter-spacing:-2px; }
-
-  /* row of things to count, shown above the choices in counting rounds */
-  #countBox{
-    flex:0 0 auto;display:none;flex-wrap:wrap;gap:2px 6px;
-    align-items:center;justify-content:center;
-    max-width:min(96vw,760px);margin:0 auto 8px;
-    background:rgba(255,255,255,.22);border-radius:22px;
-    padding:8px 14px;
-  }
-  #countBox.on{display:flex;}
-  #countBox span{
-    font-size:clamp(30px,7.5vw,60px);line-height:1.05;
-    filter:drop-shadow(0 2px 1px rgba(0,0,0,.3));
-  }
+  #choices.four .choice .letter.two{ font-size:calc(var(--tile) * .34); }
   .choice .cap{
     position:absolute;top:-14px;left:50%;transform:translateX(-50%);
     font-size:26px;pointer-events:none;
   }
+  /* while the voice is speaking, taps do nothing */
+  #choices.waiting .choice{ pointer-events:none; }
+  #choices.waiting{ opacity:.92; }
+  /* an option removed by the helper hand after repeated misses */
+  .choice.gone{ opacity:.12;pointer-events:none;transform:scale(.9); }
   .choice.wrong{animation:shake .45s;}
   .choice.right{animation:pop .5s;z-index:5;}
-  .choice.fade{opacity:.28;transition:opacity .3s;}
+  .choice.fade{opacity:.28;}
   @keyframes shake{
     0%,100%{transform:translateX(0)}
     20%{transform:translateX(-12px) rotate(-4deg)}
@@ -158,90 +147,149 @@
     60%{transform:translateX(-8px) rotate(-3deg)}
     80%{transform:translateX(8px) rotate(3deg)}
   }
-  @keyframes pop{
-    0%{transform:scale(1)}45%{transform:scale(1.22) rotate(-3deg)}100%{transform:scale(1)}
+  @keyframes pop{0%{transform:scale(1)}45%{transform:scale(1.22) rotate(-3deg)}100%{transform:scale(1)}}
+
+  /* ---------- things to count ---------- */
+  #countBox{
+    flex:0 0 auto;display:none;
+    max-width:min(96vw,700px);margin:0 auto 8px;
+    background:rgba(255,255,255,.22);border-radius:22px;padding:8px 14px;
   }
+  #countBox.on{display:grid;}
+  #countBox.row{ grid-auto-flow:column;gap:6px;align-items:center;justify-items:center; }
+  #countBox.dice{ grid-template-columns:repeat(3,1fr);gap:4px; }
+  #countBox.frame{ grid-template-columns:repeat(5,1fr);gap:5px; }
+  .cell{
+    display:flex;align-items:center;justify-content:center;
+    font-size:clamp(26px,6.4vw,54px);line-height:1;
+    min-width:1.05em;min-height:1.05em;
+    filter:drop-shadow(0 2px 1px rgba(0,0,0,.3));
+    transition:transform .18s ease;
+  }
+  .cell.empty{ filter:none; }
+  /* a ten-frame only teaches "five and two more" if you can see the empties */
+  #countBox.frame .cell{
+    border:2px dashed rgba(255,255,255,.55);border-radius:8px;
+    background:rgba(255,255,255,.10);
+  }
+  .cell.tick{ transform:scale(1.28); }
+  .cell.counted{ filter:drop-shadow(0 0 6px #fff) drop-shadow(0 2px 1px rgba(0,0,0,.3)); }
 
   /* ---------- build progress ---------- */
   #site{
-    flex:0 0 auto;height:58px;width:100%;max-width:620px;
-    display:flex;align-items:flex-end;justify-content:center;gap:6px;
-    margin-top:6px;
+    flex:0 0 auto;height:52px;width:100%;max-width:620px;
+    display:flex;align-items:flex-end;justify-content:center;gap:6px;margin-top:6px;
   }
   .brick{
-    width:44px;height:26px;border-radius:6px;background:rgba(255,255,255,.22);
+    width:44px;height:24px;border-radius:6px;background:rgba(255,255,255,.22);
     border:3px dashed rgba(255,255,255,.4);
   }
   .brick.filled{
     background:#c0392b;border:3px solid #8e2b20;
     box-shadow:inset 0 -6px 0 rgba(0,0,0,.15);
-    animation:drop .4s ease-out;
   }
+  /* only the brick he just earned drops in — animating the whole row every
+     round made the finished part of the wall look unfinished again */
+  .brick.filled.justlaid{ animation:drop .4s ease-out; }
   @keyframes drop{0%{transform:translateY(-60px);opacity:0}100%{transform:none;opacity:1}}
 
   /* ---------- celebration ---------- */
   #cheer{
     position:absolute;inset:0;display:none;
     flex-direction:column;align-items:center;justify-content:center;
-    background:rgba(0,0,0,.45);z-index:20;text-align:center;
+    background:rgba(0,0,0,.45);z-index:20;text-align:center;padding:6px;overflow:hidden;
   }
   #cheer.on{display:flex;}
   #cheerText{
-    font-size:clamp(30px,9vw,68px);font-weight:900;color:#fff;
-    text-shadow:0 5px 0 rgba(0,0,0,.35);
+    font-size:clamp(24px,6.4vw,54px);font-weight:900;color:#fff;
+    text-shadow:0 5px 0 rgba(0,0,0,.35);max-width:96%;line-height:1.08;padding:0 8px;
   }
-  #cheerEmo{
-    font-size:clamp(70px,20vw,150px);line-height:1.35;
-    margin-bottom:6px;animation:pop .6s;
-  }
-  .confetti{
-    position:absolute;width:14px;height:20px;border-radius:3px;
-    top:-30px;z-index:30;pointer-events:none;
-  }
-  #truck{
+  #cheerEmo{font-size:clamp(58px,15vw,120px);line-height:1.4;margin-bottom:10px;animation:pop .6s;}
+  .confetti{position:absolute;width:14px;height:20px;border-radius:3px;top:-30px;z-index:30;pointer-events:none;}
+  #truck,#truck2{
     position:absolute;bottom:6px;left:-140px;font-size:clamp(48px,13vw,90px);
     z-index:25;pointer-events:none;display:none;
   }
+  #truck2{bottom:4px;font-size:clamp(38px,10vw,72px);}
   #truck.go{display:block;animation:drive 2.6s linear;}
-  @keyframes drive{
-    from{left:-140px} to{left:110%}
-  }
-  .hint{
-    position:absolute;bottom:8px;left:0;right:0;text-align:center;
-    font-size:13px;color:rgba(0,0,0,.45);padding:0 10px;
-  }
+  #truck2.go{display:block;animation:drive 3.1s linear .5s;}
+  @keyframes drive{from{left:-140px} to{left:110%}}
 
-  /* Short screens — mainly a phone held sideways. Everything has to shrink
-     together or the prompt gets clipped behind the top bar and the brick
-     row falls off the bottom. */
+  #tower{display:none;flex-direction:column-reverse;align-items:center;gap:3px;margin-bottom:8px;}
+  #tower.on{display:flex;}
+  .floor{
+    width:clamp(96px,26vw,200px);height:clamp(15px,3.6vw,26px);
+    background:#c0392b;border:3px solid #8e2b20;border-radius:5px;
+    box-shadow:inset 0 -5px 0 rgba(0,0,0,.16);animation:rise .45s ease-out both;
+  }
+  .floor.cap{width:clamp(112px,30vw,230px);background:#8e2b20;border-color:#63201a;height:clamp(11px,2.6vw,18px);}
+  #towerTop{font-size:clamp(34px,9vw,64px);line-height:1;animation:rise .5s ease-out both;}
+  @keyframes rise{0%{transform:translateY(46px) scale(.85);opacity:0}100%{transform:none;opacity:1}}
+  .firework{
+    position:absolute;font-size:clamp(40px,11vw,84px);
+    z-index:21;pointer-events:none;animation:boom 1.5s ease-out both;
+  }
+  @keyframes boom{
+    0%{transform:scale(.2);opacity:0}25%{transform:scale(1.15);opacity:1}
+    70%{transform:scale(1);opacity:1}100%{transform:scale(1.25);opacity:0}
+  }
+  #tower,#cheerEmo,#cheerText{position:relative;z-index:24;}
+
+  /* ---------- progress panel (for grown-ups) ---------- */
+  #progress{
+    position:absolute;inset:0;display:none;z-index:40;
+    background:#241a10;color:#fff;
+    padding:14px;overflow-y:auto;-webkit-overflow-scrolling:touch;
+  }
+  #progress.on{display:block;}
+  #progress h2{margin:0 0 4px;font-size:clamp(18px,4.6vw,26px);}
+  #progress .sub{opacity:.7;font-size:13px;margin-bottom:14px;}
+  .pcard{background:rgba(255,255,255,.10);border-radius:16px;padding:12px 14px;margin-bottom:12px;}
+  .pcard h3{margin:0 0 8px;font-size:clamp(15px,3.8vw,20px);}
+  .pline{font-size:clamp(13px,3.2vw,16px);margin:4px 0;opacity:.95;}
+  .bar{height:16px;border-radius:8px;background:rgba(255,255,255,.16);position:relative;margin:8px 0 4px;overflow:hidden;}
+  .bar > i{position:absolute;left:0;top:0;bottom:0;background:#4ec36b;border-radius:8px;}
+  .bar > b{position:absolute;top:-3px;bottom:-3px;width:3px;background:#ffd43b;}
+  .chip{
+    display:inline-block;background:#c0392b;border-radius:10px;
+    padding:3px 9px;margin:3px 4px 0 0;font-size:clamp(13px,3.2vw,16px);font-weight:700;
+  }
+  .chip.ok{background:rgba(255,255,255,.16);}
+  #progClose{
+    display:block;margin:6px auto 20px;border:0;cursor:pointer;font-family:inherit;
+    background:#ffcc00;color:#2b2118;border-radius:999px;padding:11px 26px;font-size:16px;font-weight:900;
+  }
+  .hint{position:absolute;bottom:8px;left:0;right:0;text-align:center;font-size:13px;color:rgba(0,0,0,.45);padding:0 10px;}
+
+  /* ---------- short screens (phone held sideways) ---------- */
   @media (max-height: 500px){
     :root{ --tile:min(21vw, 40vh); }
-    #bar{ min-height:42px; padding:4px 8px; }
-    .iconbtn{ height:36px;width:46px;font-size:19px; }
-    #promptText{ font-size:clamp(17px,4.2vw,26px); }
-    #prompt{ margin-bottom:4px; }
-    #countBox{ padding:4px 10px;margin-bottom:4px;border-radius:16px; }
-    #countBox span{ font-size:clamp(19px,4.4vw,32px); }
-    #site{ height:24px; }
-    .brick{ width:32px;height:13px;border-width:2px; }
-    #title{ font-size:clamp(18px,5vw,38px);margin-bottom:0; }
-    #subtitle{ margin-bottom:10px; }
-    /* menu buttons go icon-beside-label so all three sit on one row */
-    .menuwrap{ gap:10px; }
-    .bigbtn{ flex-direction:row;gap:10px;padding:10px 16px;min-width:0;border-radius:20px; }
-    .bigbtn .ico{ font-size:clamp(24px,5.2vw,34px); }
-    .bigbtn .lbl{ font-size:clamp(15px,3.6vw,22px); }
-    #voiceBtn{ margin-top:10px; }
-    .hint{ display:none; }
+    #bar{min-height:42px;padding:4px 8px;}
+    .iconbtn{height:36px;width:46px;font-size:19px;}
+    #promptText{font-size:clamp(16px,3.9vw,25px);}
+    #prompt{margin-bottom:4px;}
+    #countBox{padding:4px 10px;margin-bottom:4px;border-radius:16px;}
+    .cell{font-size:clamp(17px,3.9vw,30px);}
+    #site{height:24px;}
+    .brick{width:32px;height:13px;border-width:2px;}
+    #title{font-size:clamp(18px,5vw,38px);margin-bottom:0;}
+    #subtitle{margin-bottom:8px;}
+    .menuwrap{gap:10px;}
+    .bigbtn{flex-direction:row;gap:10px;padding:10px 16px;min-width:0;border-radius:20px;}
+    .bigbtn .ico{font-size:clamp(24px,5.2vw,34px);}
+    .bigbtn .lbl{font-size:clamp(15px,3.6vw,22px);}
+    .grownup{margin-top:10px;}
+    .hint{display:none;}
+    #tower{gap:2px;margin-bottom:4px;}
+    .floor{width:clamp(70px,18vw,140px);height:11px;border-width:2px;}
+    .floor.cap{width:clamp(84px,21vw,160px);height:8px;}
+    #towerTop{font-size:clamp(22px,5.5vw,34px);}
+    #cheerEmo{font-size:clamp(30px,7.4vw,46px);line-height:1.5;margin-bottom:4px;}
+    #cheerText{font-size:clamp(18px,4.6vw,30px);line-height:1.05;}
+    .firework{font-size:clamp(26px,7vw,46px);}
+    #truck,#truck2{font-size:clamp(26px,6.5vw,44px);bottom:2px;}
+    #cheer{padding-bottom:46px;}
   }
-  /* grown-up control: cycle the speaking voice. menu only. */
-  #voiceBtn{
-    margin-top:18px;border:0;cursor:pointer;font-family:inherit;
-    background:rgba(0,0,0,.14);color:#4a3517;
-    border-radius:999px;padding:8px 16px;font-size:13px;font-weight:700;
-    max-width:90vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
-  }
-  #voiceBtn:active{transform:translateY(2px);}
 </style>
 </head>
 <body>
@@ -256,26 +304,21 @@
 
 <div id="stage">
 
-  <!-- MENU -->
   <section class="screen on" id="menuScreen">
     <div id="title">🚧 CONSTRUCTION CREW 🚧</div>
     <div id="subtitle">Pick a job, boss!</div>
     <div class="menuwrap">
-      <button class="bigbtn" data-mode="colors">
-        <span class="ico">🎨</span><span class="lbl">COLORS</span>
-      </button>
-      <button class="bigbtn" data-mode="letters">
-        <span class="ico">🔤</span><span class="lbl">LETTERS</span>
-      </button>
-      <button class="bigbtn" data-mode="numbers">
-        <span class="ico">🔢</span><span class="lbl">NUMBERS</span>
-      </button>
+      <button class="bigbtn" data-mode="colors"><span class="ico">🎨</span><span class="lbl">COLORS</span></button>
+      <button class="bigbtn" data-mode="letters"><span class="ico">🔤</span><span class="lbl">LETTERS</span></button>
+      <button class="bigbtn" data-mode="numbers"><span class="ico">🔢</span><span class="lbl">NUMBERS</span></button>
     </div>
-    <button id="voiceBtn" title="Change the speaking voice">🗣️ Voice: checking…</button>
-    <div class="hint">Tap a button to start · 🔊 turns the voice on and off</div>
+    <div class="grownup">
+      <button class="minibtn" id="voiceBtn" title="Change the speaking voice">🗣️ Voice: checking…</button>
+      <button class="minibtn" id="progBtn" title="Progress so far">📋 How's it going?</button>
+    </div>
+    <div class="hint">Tap a job to start · 🔊 turns the voice on and off</div>
   </section>
 
-  <!-- PLAY -->
   <section class="screen" id="playScreen">
     <div id="prompt"><div id="promptText"></div></div>
     <div id="countBox"></div>
@@ -284,10 +327,19 @@
   </section>
 
   <div id="cheer">
+    <div id="tower"></div>
     <div id="cheerEmo">🎉</div>
     <div id="cheerText">GREAT JOB!</div>
   </div>
   <div id="truck">🚚</div>
+  <div id="truck2">🚜</div>
+
+  <div id="progress">
+    <h2>📋 How's it going?</h2>
+    <div class="sub" id="progSub"></div>
+    <div id="progBody"></div>
+    <button id="progClose">Close</button>
+  </div>
 </div>
 
 <div class="hazard"></div>
@@ -295,6 +347,74 @@
 <script>
 (function(){
 "use strict";
+
+/* ============================================================
+   THINGS YOU MIGHT WANT TO CHANGE
+   ============================================================ */
+var CONFIG = {
+  BRICKS_PER_LEVEL   : 5,      /* correct answers per celebration          */
+  NUMBERS_UP_TO      : 10,     /* highest numeral shown                    */
+  COUNTING_ROUNDS    : true,   /* mix "how many?" rounds into numbers      */
+  COUNT_MAX          : 6,      /* biggest quantity a counting round asks   */
+  LETTER_SOUND_ROUNDS: true,   /* mix "which letter says buh?" rounds in   */
+  SOUND_ROUND_SHARE  : 0.30,   /* how often, when sound rounds are on      */
+  LETTER_CASE        : "mixed",/* "upper" | "lower" | "mixed"              */
+  LOWERCASE_SHARE    : 0.35,   /* share of lowercase rounds when mixed     */
+  ADAPTIVE           : true,   /* practise missed items more often         */
+  BASE_CHOICES       : 3,      /* normal number of options — never fewer   */
+  MAX_CHOICES        : 4,      /* options once an item is solid            */
+  SAVE_PROGRESS      : true,   /* remember progress between sessions       */
+  PREFERRED_VOICE_NAME: ""     /* force one exact voice by name            */
+};
+
+/* Gap after naming a wrong choice, before the question is asked again.
+   Speech engines mostly ignore punctuation for pausing, so the two halves
+   are spoken as separate utterances with a real timed silence between. */
+var CORRECTION_GAP_MS = 750;
+var PRAISE_GAP_MS     = 320;
+var MIN_LOCK_MS       = 1000;
+
+/* ============================================================
+   GLYPH SAFETY
+   Emoji added in Unicode 13+ (bucket, log, pickup truck) are missing on
+   plenty of devices and render as an empty box. Everything below is drawn
+   once to a canvas and compared against a known-unrenderable character;
+   anything that matches is dropped before the child ever sees it.
+   ============================================================ */
+var glyphOk = (function(){
+  try{
+    var c = document.createElement("canvas");
+    c.width = 44; c.height = 44;
+    var ctx = c.getContext && c.getContext("2d");
+    if(!ctx) return function(){ return true; };
+    ctx.textBaseline = "top";
+    ctx.font = "30px sans-serif";
+    function snap(s){
+      ctx.clearRect(0,0,44,44);
+      ctx.fillText(s, 2, 2);
+      return c.toDataURL();
+    }
+    var blank = snap("");
+    var tofu  = snap("􏿿");    /* U+10FFFF — never has a glyph */
+    var cache = {};
+    return function(ch){
+      if(cache.hasOwnProperty(ch)) return cache[ch];
+      var img = snap(ch);
+      var ok = (img !== blank && img !== tofu);
+      cache[ch] = ok;
+      return ok;
+    };
+  }catch(e){
+    return function(){ return true; };
+  }
+})();
+
+function safeEmo(ch, fallback){ return glyphOk(ch) ? ch : fallback; }
+function filterEmo(list, fallback){
+  var out = [], i;
+  for(i=0;i<list.length;i++){ if(glyphOk(list[i].emo)) out.push(list[i]); }
+  return out.length ? out : fallback;
+}
 
 /* ============================================================
    DATA
@@ -310,101 +430,273 @@ var COLORS = [
   {name:"BROWN",  say:"brown",  hex:"#8b5a2b", text:"#fff"}
 ];
 
-/* emoji drawn on the coloured panels. picked to read well at large size */
-var VEHICLES = [
-  {emo:"🚚", say:"truck"},
-  {emo:"🚜", say:"digger"},
+/* deliberately old, widely-shipped emoji — nothing newer than Unicode 11 */
+var VEHICLES = filterEmo([
+  {emo:"🚚",  say:"truck"},
+  {emo:"🚜",  say:"digger"},
   {emo:"🏗️", say:"crane"},
-  {emo:"🛻", say:"pickup truck"},
-  {emo:"🚧", say:"barrier"},
+  {emo:"🚛",  say:"big truck"},
+  {emo:"🚧",  say:"barrier"},
   {emo:"⛑️", say:"helmet"},
-  {emo:"🔨", say:"hammer"},
-  {emo:"🪣", say:"bucket"}
-];
+  {emo:"🔨",  say:"hammer"},
+  {emo:"🔧",  say:"wrench"}
+], [{emo:"🚧", say:"barrier"}]);
 
-/* ---- numbers ----
-   NUMBERS_UP_TO: highest numeral shown (1..this). 10 is a sensible ceiling for 4.
-   COUNTING_ROUNDS: mixes in "how many cones? tap the number" rounds.
-                    set to false for pure numeral recognition only.
-   COUNT_MAX: counting rounds never ask for more than this many objects — past
-              ~6, counting a scattered row is hard for this age. */
-var NUMBERS_UP_TO   = 10;
-var COUNTING_ROUNDS = true;
-var COUNT_MAX       = 6;
+var COUNTABLES = filterEmo([
+  {emo:"🚧",  say:"barriers", one:"barrier"},
+  {emo:"⛑️", say:"helmets",  one:"helmet"},
+  {emo:"🔨",  say:"hammers",  one:"hammer"},
+  {emo:"🔩",  say:"bolts",    one:"bolt"},
+  {emo:"⚙️", say:"gears",    one:"gear"},
+  {emo:"🔧",  say:"wrenches", one:"wrench"},
+  {emo:"🚚",  say:"trucks",   one:"truck"},
+  {emo:"🧱",  say:"bricks",   one:"brick"}
+], [{emo:"🚧", say:"barriers", one:"barrier"}]);
+
+var SIGN_CAPS = [
+  safeEmo("🚧","•"), safeEmo("⛑️","•"), safeEmo("🔨","•"), safeEmo("🔧","•")
+];
+var SIGN_COLORS = ["#fcc419","#ffa94d","#ffd43b","#f8f0d8","#ffe066"];
+
+var UPPER = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+var LOWER = "abcdefghijklmnopqrstuvwxyz".split("");
+
+/* letters that get confused at a glance, per case */
+var LOOK_UPPER = [["E","F"],["M","N"],["M","W"],["O","Q"],["P","R"],["V","W"],
+                  ["I","T"],["C","G"],["U","V"],["B","D"],["I","L"],["O","D"]];
+var LOOK_LOWER = [["b","d"],["p","q"],["b","p"],["d","q"],["n","u"],["m","n"],
+                  ["m","w"],["i","l"],["i","j"],["l","j"],["a","o"],["c","e"],
+                  ["g","q"],["h","n"],["v","w"],["f","t"],["v","y"],["c","o"]];
+var LOOK_NUM   = [["6","9"],["1","7"],["3","8"],["2","5"],["6","8"]];
+
+/* Sound rounds. Consonants get a spoken approximation plus a word the
+   sound starts; vowels get the word only, because a text-to-speech engine
+   cannot be trusted to produce a bare short vowel — it tends to read
+   "aaa" as the letter name, which would teach the wrong thing. */
+var LETTER_SOUND = {
+  A:{sound:null,  word:"apple"},   B:{sound:"buh", word:"ball"},
+  C:{sound:"kuh", word:"cat"},     D:{sound:"duh", word:"dog"},
+  E:{sound:null,  word:"egg"},     F:{sound:"ffff",word:"fish"},
+  G:{sound:"guh", word:"goat"},    H:{sound:"huh", word:"hat"},
+  I:{sound:null,  word:"igloo"},   J:{sound:"juh", word:"jam"},
+  K:{sound:"kuh", word:"kite"},    L:{sound:"llll",word:"leaf"},
+  M:{sound:"mmmm",word:"moon"},    N:{sound:"nnnn",word:"nest"},
+  O:{sound:null,  word:"octopus"}, P:{sound:"puh", word:"pig"},
+  Q:{sound:"kwuh",word:"queen"},   R:{sound:"rrrr",word:"rain"},
+  S:{sound:"ssss",word:"sun"},     T:{sound:"tuh", word:"truck"},
+  U:{sound:null,  word:"umbrella"},V:{sound:"vvvv",word:"van"},
+  W:{sound:"wuh", word:"wheel"},   X:{sound:"ks",  word:"fox"},
+  Y:{sound:"yuh", word:"yellow"},  Z:{sound:"zzzz",word:"zip"}
+};
 
 var NUM_WORDS = ["zero","one","two","three","four","five","six","seven","eight",
                  "nine","ten","eleven","twelve","thirteen","fourteen","fifteen",
                  "sixteen","seventeen","eighteen","nineteen","twenty"];
 
-/* small things that are easy to count, one type per round */
-var COUNTABLES = [
-  {emo:"🚧", say:"barriers"},
-  {emo:"⛑️", say:"helmets"},
-  {emo:"🧱", say:"bricks"},
-  {emo:"🔨", say:"hammers"},
-  {emo:"🪵", say:"logs"},
-  {emo:"🚚", say:"trucks"},
-  {emo:"🪣", say:"buckets"},
-  {emo:"🔩", say:"bolts"}
+var PRAISE = [
+  "Yes!","You found it!","You worked that out!","You spotted it!",
+  "That's the one!","You did it!","You figured it out!","You got there!",
+  "Well spotted!","That's it!","Nice work!","You looked carefully!",
+  "Good thinking!","You kept looking!","Great job!","Right on the money!"
 ];
 
-var LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
-/* letters that look alike in blocky caps — avoid pairing them as distractors */
-var LOOKALIKE = [["E","F"],["M","N"],["M","W"],["O","Q"],["P","R"],["V","W"],["I","T"],["C","G"],["U","V"],["B","D"],
-/* numerals that trip up new readers: 6/9 are rotations, 1/7 and 3/8 are close */
-                 ["6","9"],["1","7"],["3","8"],["2","5"]];
-
-var SIGN_COLORS = ["#fcc419","#ffa94d","#ffd43b","#f8f0d8","#ffe066"];
-var CHEERS = ["GREAT JOB!","YOU GOT IT!","NICE WORK!","AWESOME!","WELL DONE!","SUPER!"];
-var CHEER_EMO = ["🎉","⭐","🏆","👷","🎊","💪"];
-
-var BRICKS_PER_LEVEL = 5;
+var TIERS = [
+  { confetti:45,  floors:0, top:"",  dur:2900, trucks:1,
+    emo:[safeEmo("🎉","*"),safeEmo("⭐","*"),safeEmo("👷","*")],
+    text:["GREAT JOB!","YOU DID IT!","NICE WORK!"],
+    line:["You built it! Great job!","Nice work, crew!","You finished the row!"] },
+  { confetti:85,  floors:3, top:safeEmo("🏢",""), dur:3700, trucks:2,
+    emo:[safeEmo("🏆","*"),safeEmo("🎊","*"),safeEmo("🚧","*")],
+    text:["AWESOME!","LOOK AT THAT!","BRILLIANT!"],
+    line:["Wow! The building is going up!","Look at that! Three floors already!"] },
+  { confetti:150, floors:6, top:safeEmo("🏗️",""), dur:5200, trucks:2, fireworks:true,
+    emo:[safeEmo("🏆","*"),safeEmo("🎊","*"),safeEmo("🎉","*")],
+    text:["THE WHOLE TOWER!","YOU BUILT IT ALL!"],
+    line:["Wow! You built the whole tower! The whole crew is cheering!",
+          "You did it! The tower is finished! Everybody is cheering!"] }
+];
 
 /* ============================================================
    STATE
    ============================================================ */
 var state = {
-  mode:null,           /* "colors" | "letters" | "numbers" */
-  roundType:"id",      /* "id" = recognise the symbol, "count" = count objects */
+  mode:null,
+  roundType:"id",       /* "id" | "count" | "sound" */
   target:null,
-  sayAgain:"",         /* exact phrase the 🔁 button replays */
-  bricks:0,
-  stars:0,
-  locked:false,
-  muted:false,
-  lastTarget:null
+  sayParts:[],          /* what 🔁 replays */
+  labelFor:null,
+  retryParts:[],        /* spoken after naming a wrong choice */
+  successLabel:"",
+  countThing:null,
+  countCells:[],
+  missesThisRound:0,
+  choiceCount:3,
+  bricks:0, stars:0, levelsDone:0,
+  locked:false, muted:false,
+  lastTarget:null, releaseLock:null
 };
 
-/* ============================================================
-   DOM
-   ============================================================ */
-var $ = function(id){ return document.getElementById(id); };
-var menuScreen=$("menuScreen"), playScreen=$("playScreen");
-var choicesEl=$("choices"), promptEl=$("promptText"), siteEl=$("site"), countBox=$("countBox"),
-    scoreEl=$("score"), cheerEl=$("cheer"), cheerText=$("cheerText"),
-    cheerEmo=$("cheerEmo"), truckEl=$("truck"), stage=$("stage");
+/* ------------------------------------------------------------------
+   PROGRESS — kept per mode, per item, and saved between sessions.
+
+   Storage can legitimately be unavailable: Safari private browsing throws
+   on write, some embedded viewers block it outright. Every access is
+   wrapped, and if it fails the game carries on exactly as before with
+   progress that lasts only for the session. The panel says which of the
+   two you are getting rather than quietly pretending it saved.
+   ------------------------------------------------------------------ */
+var STORE_KEY = "constructionCrew.progress.v1";
+var store = (function(){
+  if(!CONFIG.SAVE_PROGRESS) return null;
+  try{
+    var t = "__cc_probe__";
+    window.localStorage.setItem(t, "1");
+    window.localStorage.removeItem(t);
+    return window.localStorage;
+  }catch(e){ return null; }
+})();
+
+var stats = {};
+var days  = {};   /* "YYYY-MM-DD" -> {rounds, firstTry} */
+
+function modeStats(m){
+  if(!stats[m]) stats[m] = {items:{}, rounds:0, firstTry:0, chanceSum:0, answers:0};
+  return stats[m];
+}
+function itemStats(m, key){
+  var ms = modeStats(m);
+  if(!ms.items[key]) ms.items[key] = {seen:0, right:0, wrong:0, streak:0, lastRound:-99};
+  return ms.items[key];
+}
+function todayKey(){
+  var d = new Date(), p = function(n){ return (n<10?"0":"")+n; };
+  return d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate());
+}
+function dayRec(){
+  var k = todayKey();
+  if(!days[k]) days[k] = {rounds:0, firstTry:0};
+  return days[k];
+}
+
+function num(v, dflt){ return (typeof v === "number" && isFinite(v)) ? v : dflt; }
+function normalise(){
+  var m, k;
+  for(m in stats){
+    if(!stats.hasOwnProperty(m)) continue;
+    var ms = stats[m];
+    if(!ms || typeof ms !== "object"){ delete stats[m]; continue; }
+    ms.rounds    = num(ms.rounds,0);
+    ms.firstTry  = num(ms.firstTry,0);
+    ms.chanceSum = num(ms.chanceSum,0);
+    ms.answers   = num(ms.answers,0);
+    if(!ms.items || typeof ms.items !== "object") ms.items = {};
+    for(k in ms.items){
+      if(!ms.items.hasOwnProperty(k)) continue;
+      var it = ms.items[k];
+      if(!it || typeof it !== "object"){ delete ms.items[k]; continue; }
+      it.seen  = num(it.seen,0);  it.right = num(it.right,0);
+      it.wrong = num(it.wrong,0); it.streak = num(it.streak,0);
+      /* a saved round number means nothing in the new session — treat every
+         item as "not seen recently" so the spacing rule starts clean */
+      it.lastRound = -99;
+    }
+  }
+  for(k in days){
+    if(!days.hasOwnProperty(k)) continue;
+    if(!days[k] || typeof days[k] !== "object"){ delete days[k]; continue; }
+    days[k].rounds   = num(days[k].rounds,0);
+    days[k].firstTry = num(days[k].firstTry,0);
+  }
+}
+function loadProgress(){
+  if(!store) return;
+  try{
+    var raw = store.getItem(STORE_KEY);
+    if(!raw) return;
+    var data = JSON.parse(raw);
+    if(!data || data.v !== 1) return;          /* future format — ignore, don't crash */
+    if(data.stats && typeof data.stats === "object") stats = data.stats;
+    if(data.days  && typeof data.days  === "object") days  = data.days;
+    normalise();
+  }catch(e){ stats = {}; days = {}; }
+}
+var saveTimer = null;
+function saveProgress(){
+  if(!store || saveTimer) return;
+  saveTimer = setTimeout(function(){
+    saveTimer = null;
+    /* keep a month of daily history, no more */
+    try{
+      var keys = Object.keys(days).sort();
+      while(keys.length > 30) delete days[keys.shift()];
+      store.setItem(STORE_KEY, JSON.stringify({v:1, stats:stats, days:days, saved:todayKey()}));
+    }catch(e){ /* quota or private mode — stay session-only, silently */ }
+  }, 500);
+}
+function saveNow(){
+  if(!store) return;
+  if(saveTimer){ clearTimeout(saveTimer); saveTimer = null; }
+  try{
+    store.setItem(STORE_KEY, JSON.stringify({v:1, stats:stats, days:days, saved:todayKey()}));
+  }catch(e){}
+}
+function resetProgress(){
+  stats = {}; days = {};
+  if(store){ try{ store.removeItem(STORE_KEY); }catch(e){} }
+}
+loadProgress();
+/* a tab closed mid-round should not lose the last few answers */
+window.addEventListener("pagehide", saveNow);
+document.addEventListener("visibilitychange", function(){
+  if(document.visibilityState === "hidden") saveNow();
+});
 
 /* ============================================================
-   HELPERS
+   DOM + HELPERS
    ============================================================ */
+var $ = function(id){ return document.getElementById(id); };
+var menuScreen=$("menuScreen"), playScreen=$("playScreen"), choicesEl=$("choices"),
+    promptEl=$("promptText"), siteEl=$("site"), countBox=$("countBox"), scoreEl=$("score"),
+    cheerEl=$("cheer"), cheerText=$("cheerText"), cheerEmo=$("cheerEmo"),
+    truckEl=$("truck"), truck2El=$("truck2"), towerEl=$("tower"), stage=$("stage"),
+    progressEl=$("progress"), progBody=$("progBody"), progSub=$("progSub");
+
+/* every delayed step runs through here so leaving a screen can cancel it */
+var pending = [];
+function later(fn, ms){
+  var id = setTimeout(function(){
+    var i = pending.indexOf(id); if(i>-1) pending.splice(i,1);
+    fn();
+  }, ms);
+  pending.push(id);
+  return id;
+}
+function clearPending(){
+  for(var i=0;i<pending.length;i++) clearTimeout(pending[i]);
+  pending.length = 0;
+}
+
 function rnd(n){ return Math.floor(Math.random()*n); }
-function pick(arr){ return arr[rnd(arr.length)]; }
+function pick(a){ return a[rnd(a.length)]; }
 function shuffle(a){
   var i,j,t;
   for(i=a.length-1;i>0;i--){ j=rnd(i+1); t=a[i]; a[i]=a[j]; a[j]=t; }
   return a;
 }
-function looksAlike(a,b){
-  for(var i=0;i<LOOKALIKE.length;i++){
-    var p=LOOKALIKE[i];
+function looksAlike(a,b,table){
+  for(var i=0;i<table.length;i++){
+    var p=table[i];
     if((p[0]===a&&p[1]===b)||(p[1]===a&&p[0]===b)) return true;
   }
   return false;
 }
+function numWord(n){
+  var i = parseInt(n,10);
+  return (NUM_WORDS[i] !== undefined) ? NUM_WORDS[i] : String(n);
+}
 
 /* ============================================================
-   SOUND — Web Audio for chimes, speechSynthesis for the voice.
-   Both are standard browser APIs; no files to host.
+   SOUND
    ============================================================ */
 var actx=null;
 function audio(){
@@ -429,42 +721,36 @@ function tone(freq,start,dur,type,vol){
 }
 function sfxGood(){ tone(523.25,0,.18,"triangle",.25); tone(659.25,.10,.18,"triangle",.25); tone(783.99,.20,.3,"triangle",.25); }
 function sfxNope(){ tone(196,0,.16,"sawtooth",.12); tone(155,.10,.22,"sawtooth",.12); }
-function sfxLevel(){
-  var notes=[523.25,659.25,783.99,1046.5];
-  for(var i=0;i<notes.length;i++) tone(notes[i],i*0.13,.3,"triangle",.25);
+function sfxTick(){ tone(880,0,.09,"sine",.13); }
+function sfxLevel(tier){
+  var notes;
+  if(tier>=3)       notes=[523.25,659.25,783.99,1046.5,783.99,1046.5,1318.5];
+  else if(tier===2) notes=[523.25,659.25,783.99,1046.5,1318.5];
+  else              notes=[523.25,659.25,783.99,1046.5];
+  for(var i=0;i<notes.length;i++) tone(notes[i],i*0.13,.32,"triangle",.25);
 }
 
+/* ---- voice ---- */
+var speechOK = ("speechSynthesis" in window);
 var voices=[];
 function loadVoices(){
-  if(!("speechSynthesis" in window)) return;
+  if(!speechOK) return;
   try{ voices = window.speechSynthesis.getVoices()||[]; }catch(e){ voices=[]; }
 }
-if("speechSynthesis" in window){
+if(speechOK){
   loadVoices();
   try{ window.speechSynthesis.onvoiceschanged = loadVoices; }catch(e){}
 }
-/* ---- picking a FEMALE voice ------------------------------------------------
-   Important caveat: the Web Speech API exposes no gender field on a voice.
-   SpeechSynthesisVoice only gives name, lang, voiceURI, localService and
-   default. So "female" has to be inferred from the voice's NAME, which is a
-   heuristic, not a guarantee. Known female voice names across the major
-   platforms are listed below; anything explicitly labelled male is pushed
-   down. If none of them are present on a device, the code falls back to the
-   best English voice available rather than going silent.
-   Set PREFERRED_VOICE_NAME to an exact voice name to override all of this. */
-var PREFERRED_VOICE_NAME = "";
 
+/* The Web Speech API exposes no gender field, so "female" is inferred from
+   the voice NAME. Heuristic, not a guarantee — see the notes file. */
 var FEMALE_VOICE_NAMES = [
-  /* Apple (macOS / iOS) */
   "samantha","karen","moira","tessa","fiona","victoria","allison","ava","susan",
-  "vicki","kathy","serena","nicky","zoe","siri female","joana","catherine",
-  "martha","kate","stephanie","shelley","sandy","grandma",
-  /* Microsoft (Windows / Edge) */
-  "zira","hazel","eva","aria","jenny","michelle","linda","heera","susanna",
-  "catherine","sonia","libby","natasha","clara","emily","olivia","isha","neerja",
-  "ana","yan","molly","mia","amber","ashley","cora","elizabeth","monica","sara",
-  /* Google (Android / Chrome) */
-  "google uk english female","google us english"
+  "vicki","kathy","serena","nicky","zoe","joana","catherine","martha","kate",
+  "stephanie","shelley","sandy","zira","hazel","eva","aria","jenny","michelle",
+  "linda","heera","susanna","sonia","libby","natasha","clara","emily","olivia",
+  "isha","neerja","ana","molly","mia","amber","ashley","cora","elizabeth",
+  "monica","sara","google uk english female","google us english"
 ];
 var MALE_VOICE_NAMES = [
   "alex","daniel","fred","tom","rishi","aaron","arthur","gordon","oliver",
@@ -472,50 +758,38 @@ var MALE_VOICE_NAMES = [
   "david","mark","guy","ryan","james","george","albert","bruce","william",
   "christopher","eric","roger","steffan","brian","thomas","google uk english male"
 ];
-
 function voiceScore(v){
   var name = (v.name||"").toLowerCase();
   var blob = name + " " + (v.voiceURI||"").toLowerCase();
-  var s = 0, i;
-
-  /* English first — the prompts are English */
+  var s = 0, j;
   var lang = (v.lang||"").toLowerCase().replace("_","-");
   if(lang.indexOf("en")!==0) s -= 500;
-
-  /* explicit labels win. check "female" BEFORE "male", since the word
-     "female" contains "male" as a substring. */
-  var saysFemale = blob.indexOf("female")>-1 || /\bwoman\b/.test(blob);
+  var saysFemale = blob.indexOf("female")>-1;
   var stripped   = blob.replace(/female/g,"");
-  var saysMale   = /male/.test(stripped) || /\bman\b/.test(stripped);
-  if(saysFemale)      s += 200;
-  else if(saysMale)   s -= 200;
-
-  /* known names, matched as whole words so "ava" doesn't match "available" */
-  var tokens = name.split(/[^a-z]+/).filter(Boolean);
+  var saysMale   = /male/.test(stripped);
+  if(saysFemale)    s += 200;
+  else if(saysMale) s -= 200;
+  var tokens = name.split(/[^a-z]+/);
   function hasName(list){
-    for(var j=0;j<list.length;j++){
-      var target = list[j];
-      if(target.indexOf(" ")>-1){ if(name.indexOf(target)>-1) return true; }
-      else if(tokens.indexOf(target)>-1) return true;
+    for(var i=0;i<list.length;i++){
+      var t = list[i];
+      if(t.indexOf(" ")>-1){ if(name.indexOf(t)>-1) return true; }
+      else if(tokens.indexOf(t)>-1) return true;
     }
     return false;
   }
   if(hasName(FEMALE_VOICE_NAMES)) s += 100;
   if(hasName(MALE_VOICE_NAMES))   s -= 100;
-
-  /* tie-breakers: on-device voices start faster and work offline */
   if(v.localService) s += 12;
   if(v.default)      s += 4;
   if(lang.indexOf("en-us")===0 || lang.indexOf("en-gb")===0) s += 6;
   return s;
 }
-
-/* exported shape so this is testable without a speech engine present */
 function pickVoiceFrom(list){
   if(!list || !list.length) return null;
   var i, best=null, bestScore=-1e9;
-  if(PREFERRED_VOICE_NAME){
-    for(i=0;i<list.length;i++){ if(list[i].name===PREFERRED_VOICE_NAME) return list[i]; }
+  if(CONFIG.PREFERRED_VOICE_NAME){
+    for(i=0;i<list.length;i++){ if(list[i].name===CONFIG.PREFERRED_VOICE_NAME) return list[i]; }
   }
   for(i=0;i<list.length;i++){
     var sc = voiceScore(list[i]);
@@ -523,41 +797,103 @@ function pickVoiceFrom(list){
   }
   return best;
 }
-
-/* index into the English voice list, so a grown-up can cycle voices if the
-   heuristic guessed wrong on their device */
 var voiceOverride = null;
 function englishVoices(){
-  var out = voices.filter(function(v){
-    return (v.lang||"").toLowerCase().indexOf("en")===0;
-  });
+  var out = [];
+  for(var i=0;i<voices.length;i++){
+    if((voices[i].lang||"").toLowerCase().indexOf("en")===0) out.push(voices[i]);
+  }
   return out.length ? out : voices;
 }
-function bestVoice(){
-  if(voiceOverride) return voiceOverride;
-  return pickVoiceFrom(voices);
-}
+function bestVoice(){ return voiceOverride || pickVoiceFrom(voices); }
 
-function say(text){
-  if(state.muted) return;
-  if(!("speechSynthesis" in window)) return;
+/* every phrase the game intends to speak, so wording can be checked
+   automatically on machines with no speech engine installed */
+var spokenLog = [];
+function say(text, onDone){
+  spokenLog.push(text);
+  if(spokenLog.length > 400) spokenLog.splice(0,150);
+  function finish(ok){ if(onDone){ var f=onDone; onDone=null; f(ok); } }
+  if(state.muted || !speechOK){ finish(false); return; }
   try{
     window.speechSynthesis.cancel();
     var u = new SpeechSynthesisUtterance(text);
     var v = bestVoice(); if(v) u.voice=v;
-    u.rate  = 0.85;   /* slow, for little ears */
-    u.pitch = 1.25;   /* nudged up: helps a neutral engine read as female */
+    u.rate  = 0.82;
+    u.pitch = 1.25;
     u.volume = 1;
+    u.onend   = function(){ finish(true); };
+    u.onerror = function(){ finish(false); };
     window.speechSynthesis.speak(u);
-  }catch(e){}
+  }catch(e){ finish(false); }
 }
-/* iOS/Safari will not speak unless speech was first started inside a real
-   tap handler. This primes it on the very first touch. */
+
+/* Speak a list of [{text, gap}] as SEPARATE utterances with real silence
+   between them. Punctuation alone does not produce a reliable pause in any
+   engine I can depend on, and "That's D. Find R." ran together as one
+   breath — unusable for a 4-year-old. */
+/* Every spoken chain is stamped with the generation it started in. Moving to
+   a new round bumps the generation, which strands any half-finished chain
+   instead of letting it wake up later and interleave with the new one —
+   an utterance whose "end" event arrives late (common when a cancel() from
+   somewhere else finally flushes it) would otherwise resume mid-count and
+   the child hears two sequences braided together. */
+var speechGen = 0;
+function bumpSpeech(){
+  speechGen++;
+  try{ if(speechOK) window.speechSynthesis.cancel(); }catch(e){}
+}
+function saySeq(parts, onDone){
+  var g = speechGen, i = 0;
+  function step(){
+    if(g !== speechGen) return;
+    if(i >= parts.length){ if(onDone) onDone(); return; }
+    var p = parts[i++];
+    say(p.text, function(){
+      if(g !== speechGen) return;
+      if(p.gap) later(step, p.gap);
+      else step();
+    });
+  }
+  step();
+}
+function estimate(parts){
+  var t = 0;
+  for(var i=0;i<parts.length;i++){
+    t += Math.max(550, 380 + parts[i].text.length*78) + (parts[i].gap||0);
+  }
+  return t;
+}
+
+/* Speak, holding the board until it finishes. Three guards, because
+   speechSynthesis end events are unreliable on some mobile browsers:
+   a hard floor so there is always a pause, the end events themselves,
+   and a ceiling so a missing event can never freeze the game. */
+function holdAndSay(parts, minMs, whenDone){
+  state.locked = true;
+  choicesEl.classList.add("waiting");
+  var t0 = Date.now(), released = false, ceiling = null;
+  function release(){
+    if(released) return;
+    released = true;
+    if(ceiling) clearTimeout(ceiling);
+    state.locked = false;
+    choicesEl.classList.remove("waiting");
+    if(whenDone) whenDone();
+  }
+  ceiling = setTimeout(release, estimate(parts) + 2000);
+  saySeq(parts, function(){
+    var waited = Date.now() - t0;
+    setTimeout(release, Math.max(0, (minMs||MIN_LOCK_MS) - waited) + 200);
+  });
+  state.releaseLock = release;
+}
+
 var primed=false;
 function primeSpeech(){
   if(primed) return; primed=true;
   var a=audio(); if(a && a.state==="suspended"){ try{ a.resume(); }catch(e){} }
-  if(!("speechSynthesis" in window)) return;
+  if(!speechOK) return;
   try{
     var u=new SpeechSynthesisUtterance(" ");
     u.volume=0; window.speechSynthesis.speak(u);
@@ -573,260 +909,549 @@ function show(el){
   playScreen.classList.remove("on");
   el.classList.add("on");
   var bar=$("bar");
-  if(el===menuScreen) bar.classList.add("atmenu");
-  else bar.classList.remove("atmenu");
+  if(el===menuScreen) bar.classList.add("atmenu"); else bar.classList.remove("atmenu");
 }
 function goMenu(){
-  try{ if("speechSynthesis" in window) window.speechSynthesis.cancel(); }catch(e){}
+  clearPending();
+  bumpSpeech();
+  if(state.releaseLock){ state.releaseLock(); state.releaseLock=null; }
   state.mode=null; state.locked=false;
+  choicesEl.classList.remove("waiting");
+  cheerEl.classList.remove("on");
+  towerEl.classList.remove("on"); towerEl.innerHTML="";
+  truckEl.classList.remove("go"); truck2El.classList.remove("go");
   show(menuScreen);
   renderScore(); renderSite();
 }
 
-/* ============================================================
-   SCORE + BUILD SITE
-   ============================================================ */
 function renderScore(){
-  /* past five, one star plus a count reads better than a wall of stars */
   var s="";
-  if(state.stars>5){ s = "⭐ ×"+state.stars; }
-  else { for(var i=0;i<state.stars;i++) s+="⭐"; }
+  if(state.stars>5){ s = safeEmo("⭐","*")+" ×"+state.stars; }
+  else { for(var i=0;i<state.stars;i++) s+=safeEmo("⭐","*"); }
   scoreEl.textContent = state.mode ? s : "";
 }
-function renderSite(){
+function renderSite(newest){
   siteEl.innerHTML="";
   if(!state.mode) return;
-  for(var i=0;i<BRICKS_PER_LEVEL;i++){
+  for(var i=0;i<CONFIG.BRICKS_PER_LEVEL;i++){
     var b=document.createElement("div");
-    b.className="brick"+(i<state.bricks?" filled":"");
+    var filled = i < state.bricks;
+    b.className = "brick" + (filled ? " filled" : "") +
+                  (filled && newest && i === state.bricks-1 ? " justlaid" : "");
     siteEl.appendChild(b);
   }
+}
+
+/* ============================================================
+   ADAPTIVE SELECTION
+   Uniform random means a letter he nailed ten times keeps reappearing
+   while one he has never got right shows up just as rarely. Weighting by
+   recent performance concentrates practice where it is actually needed.
+   ============================================================ */
+function itemWeight(st, roundNo){
+  if(!st || st.seen===0) return 3.5;              /* never seen — introduce it */
+  var w = 1;
+  w += 2.5 * Math.min(st.wrong, 4);               /* missed items come back    */
+  w -= 0.45 * Math.min(st.streak, 4);             /* mastered ones fade        */
+  if(st.streak >= 4) w *= 0.35;                   /* solid — occasional review */
+  var since = roundNo - st.lastRound;
+  if(since < 3) w *= 0.25;                        /* spacing, don't hammer     */
+  return Math.max(0.15, w);
+}
+function chooseTarget(mode, pool, avoid){
+  if(!CONFIG.ADAPTIVE){
+    var p2 = (pool.length>3 && avoid) ? pool.filter(function(k){return k!==avoid;}) : pool;
+    return pick(p2);
+  }
+  var ms = modeStats(mode), weights=[], total=0, i;
+  for(i=0;i<pool.length;i++){
+    var w = (pool[i]===avoid && pool.length>3) ? 0 : itemWeight(ms.items[pool[i]], ms.rounds);
+    weights.push(w); total += w;
+  }
+  if(total<=0) return pick(pool);
+  var r = Math.random()*total, acc=0;
+  for(i=0;i<pool.length;i++){
+    acc += weights[i];
+    if(r <= acc) return pool[i];
+  }
+  return pool[pool.length-1];
+}
+/* Three options is the floor for every normal round; an item he has got
+   right several times running steps up to four, which also means a correct
+   answer there carries more information. The only time he ever sees two is
+   the helper below, after he has already missed the same item twice. */
+function choiceCountFor(mode, key, poolSize){
+  var n = CONFIG.BASE_CHOICES;
+  if(CONFIG.ADAPTIVE){
+    var st = modeStats(mode).items[key];
+    if(st && st.seen > 0 && st.streak >= 3 && st.wrong <= st.right) n = CONFIG.MAX_CHOICES;
+  }
+  return Math.max(CONFIG.BASE_CHOICES, Math.min(n, poolSize));
+}
+function pickDistractors(pool, target, howMany, lookTable){
+  var others=[], guard=0;
+  while(others.length<howMany && guard<800){
+    guard++;
+    var cand = pick(pool);
+    if(cand===target || others.indexOf(cand)>-1) continue;
+    if(lookTable && looksAlike(cand,target,lookTable)) continue;
+    var clash=false;
+    for(var i=0;i<others.length;i++){
+      if(lookTable && looksAlike(cand,others[i],lookTable)) clash=true;
+    }
+    if(clash) continue;
+    others.push(cand);
+  }
+  while(others.length<howMany){                    /* safety net */
+    var f=pick(pool);
+    if(f!==target && others.indexOf(f)===-1) others.push(f);
+    else if(pool.length <= howMany+1) break;
+  }
+  return others;
 }
 
 /* ============================================================
    ROUND BUILDING
    ============================================================ */
 function newRound(){
+  clearPending();
+  bumpSpeech();
+  if(state.releaseLock){ state.releaseLock(); state.releaseLock=null; }
   state.locked=false;
+  state.missesThisRound=0;
+  state.countCells=[];
+  choicesEl.classList.remove("waiting","four");
   choicesEl.innerHTML="";
   countBox.innerHTML="";
-  countBox.classList.remove("on");
-  state.roundType = "id";
-  if(state.mode==="colors")      buildColorRound();
+  countBox.className="";
+  state.roundType="id";
+
+  if(state.mode==="colors")       buildColorRound();
   else if(state.mode==="letters") buildLetterRound();
   else                            buildNumberRound();
-  renderSite();
-  renderScore();
+
+  var ms = modeStats(state.mode);
+  var st = itemStats(state.mode, state.target);
+  st.seen++; st.lastRound = ms.rounds;
+  ms.rounds++;
+  ms.chanceSum += 1/state.choiceCount;
+
+  renderSite(); renderScore();
 }
 
-/* shared: build three sign-style tiles from a list of labels */
-function renderSigns(set, labeller){
-  var caps=["🚧","⛑️","🦺"];
-  set.forEach(function(val,i){
+function renderTiles(values, opts){
+  state.choiceCount = values.length;
+  if(values.length >= 4) choicesEl.classList.add("four");
+  values.forEach(function(val,i){
     var b=document.createElement("button");
     b.className="choice";
-    b.style.background=SIGN_COLORS[i%SIGN_COLORS.length];
-    b.setAttribute("aria-label", labeller ? labeller(val) : String(val));
     b.dataset.val=val;
-    var two = String(val).length>1 ? " two" : "";
-    b.innerHTML='<span class="cap">'+caps[i%caps.length]+'</span>'+
-                '<span class="letter'+two+'">'+val+'</span>';
+    if(opts.bg)        b.style.background = opts.bg(val,i);
+    b.setAttribute("aria-label", opts.label ? opts.label(val) : String(val));
+    b.innerHTML = opts.inner(val,i);
     b.addEventListener("click", onPick);
     choicesEl.appendChild(b);
   });
 }
 
-/* pick two distractors that aren't the target, aren't each other, and
-   aren't visually confusable with either */
-function pickDistractors(pool, target){
-  var others=[], guard=0;
-  while(others.length<2 && guard<600){
-    guard++;
-    var cand = pick(pool);
-    if(cand===target) continue;
-    if(others.indexOf(cand)>-1) continue;
-    if(looksAlike(cand,target)) continue;
-    var clash=false;
-    for(var i=0;i<others.length;i++){ if(looksAlike(cand,others[i])) clash=true; }
-    if(clash) continue;
-    others.push(cand);
-  }
-  /* safety net if the lookalike filters were too strict for a small pool */
-  while(others.length<2){
-    var f=pick(pool);
-    if(f!==target && others.indexOf(f)===-1) others.push(f);
-  }
-  return others;
+/* ---------- COLORS ---------- */
+function buildColorRound(){
+  var pool = COLORS.map(function(c){ return c.name; });
+  var targetName = chooseTarget("colors", pool, state.lastTarget);
+  var target = null, i;
+  for(i=0;i<COLORS.length;i++) if(COLORS[i].name===targetName) target=COLORS[i];
+  state.lastTarget = targetName;
+  state.target = targetName;
+
+  var n = choiceCountFor("colors", targetName, pool.length);
+  var set = shuffle([targetName].concat(pickDistractors(pool, targetName, n-1, null)));
+  var veh = pick(VEHICLES);
+
+  promptEl.innerHTML = 'Find the <span class="target" style="background:'+target.hex+
+                       ';color:'+target.text+'">'+target.name+'</span> '+veh.say.toUpperCase()+'!';
+  state.sayParts   = [{text:"Find the " + target.say + " " + veh.say}];
+  state.retryParts = [{text:"Find the " + target.say + " " + veh.say}];
+  state.successLabel = target.say + " " + veh.say;
+  state.labelFor = function(val){
+    for(var k=0;k<COLORS.length;k++) if(COLORS[k].name===val) return COLORS[k].say;
+    return String(val).toLowerCase();
+  };
+
+  renderTiles(set, {
+    bg: function(v){ for(var k=0;k<COLORS.length;k++) if(COLORS[k].name===v) return COLORS[k].hex; return "#ccc"; },
+    label: function(v){ return v; },
+    inner: function(){ return '<span class="emo">'+veh.emo+'</span>'; }
+  });
+  saySeq(state.sayParts);
 }
 
+/* ---------- LETTERS ---------- */
+function currentCase(){
+  if(CONFIG.LETTER_CASE === "lower") return "lower";
+  if(CONFIG.LETTER_CASE === "upper") return "upper";
+  return (Math.random() < CONFIG.LOWERCASE_SHARE) ? "lower" : "upper";
+}
+function buildLetterRound(){
+  var lower = currentCase() === "lower";
+  var pool  = lower ? LOWER : UPPER;
+  var table = lower ? LOOK_LOWER : LOOK_UPPER;
+
+  var target = chooseTarget("letters", pool, state.lastTarget);
+  state.lastTarget = target;
+  state.target = target;
+
+  var n = choiceCountFor("letters", target, pool.length);
+  var set = shuffle([target].concat(pickDistractors(pool, target, n-1, table)));
+
+  var upperKey = target.toUpperCase();
+  var soundable = CONFIG.LETTER_SOUND_ROUNDS && speechOK && !state.muted &&
+                  LETTER_SOUND[upperKey] && Math.random() < CONFIG.SOUND_ROUND_SHARE;
+
+  if(soundable){
+    /* A sound round must NOT show the letter, or it collapses into simple
+       shape-matching. The child hears the sound and finds the symbol. */
+    state.roundType = "sound";
+    var info = LETTER_SOUND[upperKey];
+    var ask = info.sound
+      ? "Which letter says " + info.sound + "? Like in " + info.word + "."
+      : "Which letter starts " + info.word + "?";
+    promptEl.innerHTML = safeEmo("🔊","♪") + ' Listen — which letter?';
+    state.sayParts   = [{text:ask}];
+    state.retryParts = [{text:ask}];
+    state.successLabel = target + (info.sound ? ". " + info.sound : "");
+  } else {
+    promptEl.innerHTML = 'Find the letter <span class="target">'+target+'</span>';
+    state.sayParts   = [{text:"Find the letter " + target}];
+    state.retryParts = [{text:"Find " + target}];
+    state.successLabel = target;
+  }
+  state.labelFor = function(val){ return String(val); };
+
+  renderTiles(set, {
+    bg: function(v,i){ return SIGN_COLORS[i%SIGN_COLORS.length]; },
+    label: function(v){ return "Letter "+v; },
+    inner: function(v,i){
+      var cap = SIGN_CAPS[i%SIGN_CAPS.length];
+      return '<span class="cap">'+cap+'</span><span class="letter">'+v+'</span>';
+    }
+  });
+  saySeq(state.sayParts);
+}
+
+/* ---------- NUMBERS ---------- */
 function buildNumberRound(){
   var all=[], i;
-  for(i=1;i<=NUMBERS_UP_TO;i++) all.push(String(i));
+  for(i=1;i<=CONFIG.NUMBERS_UP_TO;i++) all.push(String(i));
 
-  /* roughly one round in three is a counting round, when enabled */
-  var counting = COUNTING_ROUNDS && Math.random() < 0.34;
+  var counting = CONFIG.COUNTING_ROUNDS && Math.random() < 0.34;
 
   if(counting){
-    var maxN = Math.min(COUNT_MAX, NUMBERS_UP_TO);
+    var maxN = Math.min(CONFIG.COUNT_MAX, CONFIG.NUMBERS_UP_TO);
     var countPool=[];
     for(i=1;i<=maxN;i++) countPool.push(String(i));
-    var pool = countPool.length>3 && state.lastTarget
-      ? countPool.filter(function(n){ return n!==state.lastTarget; })
-      : countPool;
 
-    var target = pick(pool);
+    var target = chooseTarget("numbers", countPool, state.lastTarget);
     state.lastTarget = target;
     state.target = target;
     state.roundType = "count";
 
     var thing = pick(COUNTABLES);
-    countBox.innerHTML="";
-    for(i=0;i<parseInt(target,10);i++){
-      var s=document.createElement("span");
-      s.textContent=thing.emo;
-      countBox.appendChild(s);
-    }
-    countBox.classList.add("on");
+    state.countThing = thing;
+    drawCount(parseInt(target,10), thing.emo);
 
     promptEl.innerHTML = 'How many '+thing.say.toUpperCase()+'?';
-    state.sayAgain = "How many " + thing.say + "? Tap the number.";
-    say(state.sayAgain);
+    state.sayParts   = [{text:"How many " + thing.say + "?"}];
+    state.retryParts = [{text:"Let's count again."}, {text:"How many " + thing.say + "?"}];
+    state.successLabel = numWord(target) + " " +
+                         (parseInt(target,10)===1 ? (thing.one||thing.say) : thing.say);
+    state.labelFor = function(val){ return numWord(val); };
 
-    renderSigns(shuffle([target].concat(pickDistractors(all, target))),
-                function(v){ return "Number "+v; });
+    var nc = choiceCountFor("numbers", target, all.length);
+    renderTiles(shuffle([target].concat(pickDistractors(all, target, nc-1, LOOK_NUM))), {
+      bg: function(v,i){ return SIGN_COLORS[i%SIGN_COLORS.length]; },
+      label: function(v){ return "Number "+v; },
+      inner: function(v,i){
+        var two = String(v).length>1 ? " two" : "";
+        return '<span class="cap">'+SIGN_CAPS[i%SIGN_CAPS.length]+'</span>'+
+               '<span class="letter'+two+'">'+v+'</span>';
+      }
+    });
+    saySeq(state.sayParts);
     return;
   }
 
-  var pool2 = all.length>3 && state.lastTarget
-    ? all.filter(function(n){ return n!==state.lastTarget; })
-    : all;
-  var t = pick(pool2);
+  var t = chooseTarget("numbers", all, state.lastTarget);
   state.lastTarget = t;
   state.target = t;
 
   promptEl.innerHTML = 'Find the number <span class="target">'+t+'</span>';
-  state.sayAgain = "Find the number " + numWord(t);
-  say(state.sayAgain);
+  state.sayParts   = [{text:"Find the number " + numWord(t)}];
+  state.retryParts = [{text:"Find " + numWord(t)}];
+  state.successLabel = numWord(t);
+  state.labelFor = function(val){ return numWord(val); };
 
-  renderSigns(shuffle([t].concat(pickDistractors(all, t))),
-              function(v){ return "Number "+v; });
-}
-
-function numWord(n){
-  var i = parseInt(n,10);
-  return (NUM_WORDS[i] !== undefined) ? NUM_WORDS[i] : String(n);
-}
-
-function buildColorRound(){
-  var pool = COLORS.slice();
-  /* don't repeat the same target twice in a row */
-  if(state.lastTarget && pool.length>3){
-    pool = pool.filter(function(c){ return c.name!==state.lastTarget; });
-  }
-  var target = pick(pool);
-  state.lastTarget = target.name;
-
-  var others = COLORS.filter(function(c){ return c.name!==target.name; });
-  shuffle(others);
-  var set = shuffle([target, others[0], others[1]]);
-
-  /* one vehicle for the whole round, so colour is the only difference */
-  var veh = pick(VEHICLES);
-
-  state.target = target.name;
-  promptEl.innerHTML = 'Find the <span class="target" style="background:'+target.hex+';color:'+target.text+'">'+target.name+'</span> '+veh.say.toUpperCase()+'!';
-  state.sayAgain = "Find the " + target.say + " " + veh.say;
-  say(state.sayAgain);
-
-  set.forEach(function(c){
-    var b=document.createElement("button");
-    b.className="choice";
-    b.style.background=c.hex;
-    b.setAttribute("aria-label",c.name);
-    b.dataset.val=c.name;
-    b.innerHTML='<span class="emo">'+veh.emo+'</span>';
-    b.addEventListener("click", onPick);
-    choicesEl.appendChild(b);
+  var n2 = choiceCountFor("numbers", t, all.length);
+  renderTiles(shuffle([t].concat(pickDistractors(all, t, n2-1, LOOK_NUM))), {
+    bg: function(v,i){ return SIGN_COLORS[i%SIGN_COLORS.length]; },
+    label: function(v){ return "Number "+v; },
+    inner: function(v,i){
+      var two = String(v).length>1 ? " two" : "";
+      return '<span class="cap">'+SIGN_CAPS[i%SIGN_CAPS.length]+'</span>'+
+             '<span class="letter'+two+'">'+v+'</span>';
+    }
   });
+  saySeq(state.sayParts);
 }
 
-function buildLetterRound(){
-  var pool = LETTERS.slice();
-  if(state.lastTarget) pool = pool.filter(function(l){ return l!==state.lastTarget; });
-  var target = pick(pool);
-  state.lastTarget = target;
-  state.target = target;
+/* Three arrangements. A plain row pushes one-by-one counting; dice patterns
+   build instant recognition of small quantities; the ten-frame shows why
+   six is "five and one more". */
+var DICE = {1:[4],2:[0,8],3:[0,4,8],4:[0,2,6,8],5:[0,2,4,6,8],6:[0,2,3,5,6,8]};
+function drawCount(n, emo){
+  countBox.innerHTML = "";
+  state.countCells = [];
+  var kinds = ["row","frame"];
+  if(DICE[n]) kinds.push("dice");
+  var kind = pick(kinds);
+  countBox.className = kind + " on";
 
-  promptEl.innerHTML = 'Find the letter <span class="target">'+target+'</span>';
-  state.sayAgain = "Find the letter " + target;
-  say(state.sayAgain);
-
-  renderSigns(shuffle([target].concat(pickDistractors(LETTERS, target))),
-              function(v){ return "Letter "+v; });
+  var i, cell;
+  if(kind === "dice"){
+    var spots = DICE[n];
+    for(i=0;i<9;i++){
+      cell = document.createElement("div");
+      cell.className = "cell" + (spots.indexOf(i)>-1 ? "" : " empty");
+      if(spots.indexOf(i)>-1){ cell.textContent = emo; state.countCells.push(cell); }
+      else cell.innerHTML = "&nbsp;";
+      countBox.appendChild(cell);
+    }
+  } else if(kind === "frame"){
+    for(i=0;i<10;i++){
+      cell = document.createElement("div");
+      cell.className = "cell" + (i<n ? "" : " empty");
+      if(i<n){ cell.textContent = emo; state.countCells.push(cell); }
+      else cell.innerHTML = "&nbsp;";
+      countBox.appendChild(cell);
+    }
+  } else {
+    for(i=0;i<n;i++){
+      cell = document.createElement("div");
+      cell.className = "cell";
+      cell.textContent = emo;
+      state.countCells.push(cell);
+      countBox.appendChild(cell);
+    }
+  }
 }
 
 function repeatPrompt(){
-  if(!state.mode || !state.sayAgain) return;
-  say(state.sayAgain);
+  if(!state.mode || !state.sayParts.length) return;
+  saySeq(state.sayParts);
 }
 
 /* ============================================================
-   ANSWER HANDLING
+   ANSWERS
    ============================================================ */
 function onPick(ev){
   if(state.locked) return;
   var btn = ev.currentTarget;
   var val = btn.dataset.val;
+  var ms  = modeStats(state.mode);
+  var st  = itemStats(state.mode, state.target);
 
   if(val !== state.target){
-    /* wrong: no penalty, no scary feedback — just a wobble and a nudge */
+    state.missesThisRound++;
+    if(state.missesThisRound === 1){ st.wrong++; st.streak = 0; ms.answers++; saveProgress(); }
+
     btn.classList.remove("wrong");
     void btn.offsetWidth;
     btn.classList.add("wrong");
     sfxNope();
-    say("Try again");
+
+    /* Naming what he tapped turns the mistake into a second labelled
+       exposure — he hears "that's B" while looking straight at a B. The
+       pause between that and the re-ask is deliberate; run together they
+       are one unintelligible blur at this age. */
+    var named = state.labelFor ? state.labelFor(val) : String(val);
+    var parts = [{text:"That's " + named + ".", gap:CORRECTION_GAP_MS}]
+                  .concat(state.retryParts);
+
+    /* Missed twice on the same item? Quietly take one wrong option away so
+       he can finish on a success rather than spiral. */
+    var shouldEase = (state.missesThisRound >= 2);
+    holdAndSay(parts, MIN_LOCK_MS, function(){
+      if(shouldEase) easeOneOption();
+    });
     return;
   }
 
+  st.right++; st.streak++;
+  ms.answers++;
+  var today = dayRec();
+  today.rounds++;
+  if(state.missesThisRound === 0){ ms.firstTry++; today.firstTry++; }
+  saveProgress();
+
   state.locked = true;
+  choicesEl.classList.add("waiting");
   btn.classList.add("right");
   var kids = choicesEl.children;
   for(var i=0;i<kids.length;i++){ if(kids[i]!==btn) kids[i].classList.add("fade"); }
 
   sfxGood();
-  state.stars++;
-  state.bricks++;
-  renderScore();
-  renderSite();
+  state.stars++; state.bricks++;
+  renderScore(); renderSite(true);
   confetti(14);
-  say(pick(["Yes!","Nice work!","You got it!","Great job!"]));
 
-  if(state.bricks >= BRICKS_PER_LEVEL){
-    setTimeout(levelUp, 900);
-  } else {
-    setTimeout(newRound, 1300);
+  var myGen = speechGen, advanced = false;
+  function advance(){
+    if(advanced || myGen !== speechGen) return;
+    advanced = true;
+    clearTimeout(hardStop);
+    choicesEl.classList.remove("waiting");
+    if(state.bricks >= CONFIG.BRICKS_PER_LEVEL) later(levelUp, 250);
+    else later(newRound, 350);
   }
+
+  /* Praise, a beat, then the answer named again — one more free pairing of
+     the symbol with its name at the moment he is most receptive. In a
+     counting round the naming is left to countAloud, which ends on the
+     total, so it isn't said twice. */
+  var counting = (state.roundType === "count");
+  var seq = counting
+    ? [{text:nextPraise(), gap:PRAISE_GAP_MS}, {text:"Let's count them."}]
+    : [{text:nextPraise(), gap:PRAISE_GAP_MS}, {text:state.successLabel + "."}];
+
+  var budget = estimate(seq) + (counting ? state.countCells.length*1300 + 3000 : 0) + 6000;
+  var hardStop = setTimeout(advance, budget);
+
+  saySeq(seq, function(){
+    if(counting) countAloud(function(){ later(advance, 400); });
+    else later(advance, 550);
+  });
 }
 
-function levelUp(){
-  state.bricks = 0;
-  cheerEmo.textContent = pick(CHEER_EMO);
-  cheerText.textContent = pick(CHEERS);
-  cheerEl.classList.add("on");
-  sfxLevel();
-  confetti(40);
-  truckEl.classList.remove("go"); void truckEl.offsetWidth; truckEl.classList.add("go");
-  say(pick(["You built it! Great job!","Wow! The whole crew is proud!","You finished the building!"]));
-  setTimeout(function(){
-    cheerEl.classList.remove("on");
-    truckEl.classList.remove("go");
-    newRound();
-  }, 2800);
+/* fade out one wrong option, leaving a 50/50 he can win */
+function easeOneOption(){
+  var kids = choicesEl.children, live = [];
+  for(var i=0;i<kids.length;i++){
+    if(kids[i].dataset.val !== state.target && !kids[i].classList.contains("gone")) live.push(kids[i]);
+  }
+  if(live.length <= 1) return;          /* already down to a straight choice */
+  pick(live).classList.add("gone");
+}
+
+/* "one… two… three… three bolts!" — counting each object aloud while it
+   lights up is what teaches that the LAST number said is how many there
+   are. Plenty of 4-year-olds can recite to twenty without knowing that. */
+function countAloud(done){
+  var g = speechGen;
+  var cells = state.countCells, n = cells.length, i = 0;
+  var ct = state.countThing;
+  if(!n){ if(done) done(); return; }
+  function step(){
+    if(g !== speechGen) return;
+    if(i >= n){
+      /* the last number said IS how many there are — that is the whole point */
+      var noun = ct ? (n===1 ? (ct.one || ct.say) : ct.say) : "";
+      say(numWord(n) + " " + noun + "!", function(){
+        if(g !== speechGen) return;
+        later(function(){ if(done) done(); }, 200);
+      });
+      return;
+    }
+    var cell = cells[i];
+    if(cell){ cell.classList.add("tick","counted"); }
+    sfxTick();
+    (function(c){ later(function(){ if(c) c.classList.remove("tick"); }, 260); })(cell);
+    i++;
+    say(numWord(i), function(){
+      if(g !== speechGen) return;
+      later(step, 220);
+    });
+  }
+  step();
+}
+
+var praiseBag = [], lastPraise = "";
+function nextPraise(){
+  if(!praiseBag.length) praiseBag = shuffle(PRAISE.slice());
+  var p = praiseBag.pop();
+  if(p === lastPraise && praiseBag.length){ var q = praiseBag.pop(); praiseBag.push(p); p = q; }
+  lastPraise = p;
+  return p;
 }
 
 /* ============================================================
-   CONFETTI
+   CELEBRATION
    ============================================================ */
+function levelUp(){
+  state.bricks = 0;
+  state.levelsDone++;
+  var tier = TIERS[(state.levelsDone - 1) % TIERS.length];
+
+  cheerEmo.textContent = pick(tier.emo);
+  cheerText.textContent = pick(tier.text);
+
+  towerEl.innerHTML = "";
+  towerEl.classList.remove("on");
+  if(tier.floors > 0){
+    for(var i=0;i<tier.floors;i++){
+      var f=document.createElement("div");
+      f.className = "floor" + (i===tier.floors-1 ? " cap" : "");
+      f.style.animationDelay = (0.10 + i*0.13) + "s";
+      towerEl.appendChild(f);
+    }
+    if(tier.top){
+      var t=document.createElement("div");
+      t.id="towerTop"; t.textContent=tier.top;
+      t.style.animationDelay = (0.10 + tier.floors*0.13) + "s";
+      towerEl.appendChild(t);
+    }
+    towerEl.classList.add("on");
+  }
+
+  cheerEl.classList.add("on");
+  sfxLevel(state.levelsDone % TIERS.length === 0 ? 3 : (tier.floors ? 2 : 1));
+  confetti(tier.confetti);
+
+  truckEl.classList.remove("go"); void truckEl.offsetWidth; truckEl.classList.add("go");
+  if(tier.trucks > 1){
+    truck2El.classList.remove("go"); void truck2El.offsetWidth; truck2El.classList.add("go");
+  }
+  if(tier.fireworks) fireworks();
+
+  saySeq([{text:pick(tier.line)}]);
+
+  later(function(){
+    cheerEl.classList.remove("on");
+    towerEl.classList.remove("on");
+    towerEl.innerHTML = "";
+    truckEl.classList.remove("go");
+    truck2El.classList.remove("go");
+    newRound();
+  }, tier.dur);
+}
+
+function fireworks(){
+  var w = stage.clientWidth || window.innerWidth;
+  var h = stage.clientHeight || window.innerHeight;
+  var glyph = [safeEmo("🎆",""), safeEmo("✨",""), safeEmo("🎇","")].filter(Boolean);
+  if(!glyph.length) return;
+  var spots = [[0.10,0.16],[0.86,0.13],[0.50,0.05],[0.16,0.40],[0.82,0.36]];
+  spots.forEach(function(p,i){
+    later(function(){
+      var d=document.createElement("div");
+      d.className="firework";
+      d.textContent = pick(glyph);
+      d.style.left = Math.round(w*p[0]) + "px";
+      d.style.top  = Math.round(h*p[1]) + "px";
+      stage.appendChild(d);
+      setTimeout(function(){ if(d.parentNode) d.parentNode.removeChild(d); }, 1700);
+    }, i*260);
+  });
+}
+
 var CONF_COLORS=["#e03131","#1c7ed6","#fcc419","#2f9e44","#f76707","#8e44ad","#f06595","#ffffff"];
 function confetti(n){
   var w = stage.clientWidth || window.innerWidth;
@@ -846,12 +1471,110 @@ function confetti(n){
           {transform:"translate("+drift+"px,"+(stage.clientHeight+80)+"px) rotate("+(360+rnd(540))+"deg)", opacity:.9}
         ], {duration:dur, easing:"cubic-bezier(.3,.6,.6,1)"});
         anim.onfinish = function(){ if(d.parentNode) d.parentNode.removeChild(d); };
-      }catch(e){
-        /* Element.animate missing (very old browser): just clean up */
-        setTimeout(function(){ if(d.parentNode) d.parentNode.removeChild(d); }, dur);
-      }
+      }catch(e){}
       setTimeout(function(){ if(d.parentNode) d.parentNode.removeChild(d); }, dur+400);
     })();
+  }
+}
+
+/* ============================================================
+   PROGRESS PANEL
+   ============================================================ */
+var MODE_LABEL = {colors:"🎨 Colors", letters:"🔤 Letters", numbers:"🔢 Numbers"};
+var DAY_NAMES = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+function prettyDay(key){
+  var bits = key.split("-");
+  var d = new Date(+bits[0], +bits[1]-1, +bits[2]);
+  if(isNaN(d.getTime())) return key;
+  if(key === todayKey()) return "Today";
+  return DAY_NAMES[d.getDay()] + " " + (+bits[2]) + "/" + (+bits[1]);
+}
+function renderProgress(){
+  var modes = ["colors","letters","numbers"], html = "", any = false;
+
+  /* today first — it's the question a parent actually has */
+  var t = days[todayKey()];
+  if(t && t.rounds){
+    html += '<div class="pcard"><h3>Today</h3><div class="pline">'+
+            t.rounds+' rounds · <b>'+Math.round(100*t.firstTry/t.rounds)+'% right first try</b></div></div>';
+  }
+
+  var recent = Object.keys(days).sort().reverse().filter(function(k){ return days[k].rounds>0; }).slice(0,7);
+  if(recent.length > 1){
+    html += '<div class="pcard"><h3>Recent days</h3>';
+    recent.forEach(function(k){
+      var d = days[k];
+      html += '<div class="pline">'+prettyDay(k)+' — '+d.rounds+' rounds · '+
+              Math.round(100*d.firstTry/d.rounds)+'%</div>';
+    });
+    html += '</div>';
+  }
+
+  modes.forEach(function(m){
+    var ms = stats[m];
+    if(!ms || !ms.answers) return;
+    any = true;
+    var pct    = Math.round(100 * ms.firstTry / ms.rounds);
+    var chance = Math.round(100 * ms.chanceSum / ms.rounds);
+
+    var missed = [], solid = [], k;
+    for(k in ms.items){
+      if(!ms.items.hasOwnProperty(k)) continue;
+      var it = ms.items[k];
+      if(it.wrong > 0) missed.push({k:k, n:it.wrong});
+      else if(it.right >= 2) solid.push(k);
+    }
+    missed.sort(function(a,b){ return b.n - a.n; });
+
+    html += '<div class="pcard"><h3>'+MODE_LABEL[m]+' — all time</h3>';
+    html += '<div class="pline">'+ms.rounds+' rounds · <b>'+pct+'% right first try</b></div>';
+    html += '<div class="bar"><i style="width:'+Math.max(2,pct)+'%"></i>'+
+            '<b style="left:'+chance+'%"></b></div>';
+    html += '<div class="pline" style="opacity:.7">The yellow mark is ~'+chance+
+            '% — what pure guessing would score, given how many options were on screen. '+
+            'Only the gap above that mark is real learning.</div>';
+    if(missed.length){
+      html += '<div class="pline" style="margin-top:9px">Tripped him up:</div><div>';
+      missed.slice(0,14).forEach(function(x){
+        html += '<span class="chip">'+x.k+' ×'+x.n+'</span>';
+      });
+      html += '</div>';
+    } else {
+      html += '<div class="pline" style="margin-top:9px">No misses at all this session.</div>';
+    }
+    if(solid.length){
+      html += '<div class="pline" style="margin-top:9px">Solid:</div><div>';
+      solid.slice(0,20).forEach(function(k2){ html += '<span class="chip ok">'+k2+'</span>'; });
+      html += '</div>';
+    }
+    html += '</div>';
+  });
+  html += '<div class="pcard"><h3>Start fresh</h3>'+
+          '<div class="pline">Wipes every number above and starts him from scratch.</div>'+
+          '<button id="resetBtn" class="minibtn" style="margin-top:9px;background:#c0392b;color:#fff">Erase all progress</button>'+
+          '</div>';
+
+  progBody.innerHTML = any ? html :
+    '<div class="pcard"><div class="pline">Nothing played yet. '+
+    'Play a round or two and the numbers will show up here.</div></div>' + html;
+
+  progSub.textContent = store
+    ? "Saved on this device, in this browser. Private/incognito windows and a different browser each keep their own separate record."
+    : "This browser will not let the game save anything, so these numbers cover this session only and will be gone when the page reloads.";
+
+  var rb = document.getElementById("resetBtn");
+  if(rb){
+    var armed = false;
+    rb.addEventListener("click", function(){
+      if(!armed){
+        armed = true;
+        rb.textContent = "Tap again to erase";
+        setTimeout(function(){ if(armed){ armed=false; rb.textContent="Erase all progress"; } }, 4000);
+        return;
+      }
+      resetProgress();
+      renderProgress();
+    });
   }
 }
 
@@ -861,11 +1584,14 @@ function confetti(n){
 Array.prototype.forEach.call(document.querySelectorAll(".bigbtn"), function(b){
   b.addEventListener("click", function(){
     primeSpeech();
+    clearPending();
+    bumpSpeech();
     state.mode = b.dataset.mode;
     state.bricks = 0; state.stars = 0; state.lastTarget = null;
+    state.levelsDone = 0; praiseBag = []; lastPraise = "";
     show(playScreen);
     tone(660,0,.15,"triangle",.2);
-    setTimeout(newRound, 120);
+    later(newRound, 120);
   });
 });
 
@@ -875,40 +1601,34 @@ $("muteBtn").addEventListener("click", function(){
   state.muted = !state.muted;
   this.textContent = state.muted ? "🔇" : "🔊";
   if(state.muted){
-    try{ if("speechSynthesis" in window) window.speechSynthesis.cancel(); }catch(e){}
+    try{ if(speechOK) window.speechSynthesis.cancel(); }catch(e){}
   } else {
     primeSpeech();
     repeatPrompt();
   }
 });
 
-/* ---- voice picker (menu only, for grown-ups) ---- */
 var voiceBtn = $("voiceBtn");
 function shortVoiceName(v){
   if(!v) return "device default";
-  return (v.name||"voice").replace(/\s*[-(].*$/,"").slice(0,28);
+  return (v.name||"voice").replace(/\s*[-(].*$/,"").slice(0,26);
 }
 function refreshVoiceBtn(){
-  if(!("speechSynthesis" in window)){
-    voiceBtn.textContent = "🗣️ No voice on this browser";
-    voiceBtn.disabled = true; return;
-  }
+  if(!speechOK){ voiceBtn.textContent = "🗣️ No voice on this browser"; voiceBtn.disabled = true; return; }
   if(!voices.length){ voiceBtn.textContent = "🗣️ Voice: device default"; return; }
-  voiceBtn.textContent = "🗣️ Voice: " + shortVoiceName(bestVoice()) + "  (tap to change)";
+  voiceBtn.textContent = "🗣️ Voice: " + shortVoiceName(bestVoice());
 }
 voiceBtn.addEventListener("click", function(){
   primeSpeech();
   var list = englishVoices();
   if(!list.length){ say("Hello! I am ready to play."); return; }
-  var cur = bestVoice();
-  var idx = list.indexOf(cur);
+  var idx = list.indexOf(bestVoice());
   voiceOverride = list[(idx+1) % list.length];
   refreshVoiceBtn();
   say("Hello! Find the red truck.");
 });
 refreshVoiceBtn();
-if("speechSynthesis" in window){
-  /* voices often arrive asynchronously, especially on Chrome */
+if(speechOK){
   try{
     window.speechSynthesis.addEventListener("voiceschanged", function(){
       loadVoices(); refreshVoiceBtn();
@@ -917,9 +1637,16 @@ if("speechSynthesis" in window){
   setTimeout(function(){ loadVoices(); refreshVoiceBtn(); }, 600);
 }
 
+$("progBtn").addEventListener("click", function(){
+  renderProgress();
+  progressEl.classList.add("on");
+});
+$("progClose").addEventListener("click", function(){
+  progressEl.classList.remove("on");
+});
+
 $("bar").classList.add("atmenu");
 
-/* stop pinch-zoom + double-tap zoom from wrecking the layout mid-game */
 document.addEventListener("gesturestart", function(e){ e.preventDefault(); });
 var lastTouch=0;
 document.addEventListener("touchend", function(e){
@@ -928,16 +1655,47 @@ document.addEventListener("touchend", function(e){
   lastTouch=now;
 }, {passive:false});
 
-/* expose a tiny hook so the page can be smoke-tested automatically */
+/* ---- test hooks ---- */
 window.__game = {
   state: state,
-  correctSelector: function(){ return '.choice[data-val="'+ (state.target||"") +'"]'; },
-  /* exposed so voice selection can be tested against mock voice lists —
-     no speech engine is needed to check the picker's logic */
+  config: CONFIG,
+  stats: function(){ return stats; },
   pickVoiceFrom: pickVoiceFrom,
   voiceScore: voiceScore,
   currentVoiceName: function(){ var v=bestVoice(); return v? v.name : null; },
-  countShown: function(){ return countBox.children.length; }
+  countShown: function(){ return state.countCells.length; },
+  countKind: function(){ return countBox.className.replace(" on","").trim(); },
+  spokenLog: function(){ return spokenLog.slice(); },
+  lastSpoken: function(){ return spokenLog[spokenLog.length-1] || null; },
+  clearSpoken: function(){ spokenLog.length = 0; },
+  isWaiting: function(){ return choicesEl.classList.contains("waiting"); },
+  optionCount: function(){ return choicesEl.children.length; },
+  liveOptions: function(){
+    var out=[], k=choicesEl.children;
+    for(var i=0;i<k.length;i++) if(!k[i].classList.contains("gone")) out.push(k[i].dataset.val);
+    return out;
+  },
+  glyphOk: glyphOk,
+  days: function(){ return days; },
+  chooseTarget: chooseTarget,
+  itemWeight: itemWeight,
+  choiceCountFor: choiceCountFor,
+  storageWorks: function(){ return !!store; },
+  storeKey: STORE_KEY,
+  saveNow: saveNow,
+  resetProgress: function(){ resetProgress(); },
+  emojiInUse: function(){
+    var out = [];
+    VEHICLES.forEach(function(v){ out.push(v.emo); });
+    COUNTABLES.forEach(function(v){ out.push(v.emo); });
+    SIGN_CAPS.forEach(function(c){ out.push(c); });
+    TIERS.forEach(function(t){ t.emo.forEach(function(e){ out.push(e); }); if(t.top) out.push(t.top); });
+    return out;
+  },
+  praisePool: PRAISE,
+  tierInfo: function(){ return { levelsDone: state.levelsDone, floors: towerEl.children.length }; },
+  renderProgress: renderProgress,
+  progressHTML: function(){ return progBody.innerHTML; }
 };
 
 })();
