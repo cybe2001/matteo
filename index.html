@@ -149,6 +149,41 @@
   }
   @keyframes pop{0%{transform:scale(1)}45%{transform:scale(1.22) rotate(-3deg)}100%{transform:scale(1)}}
 
+  /* ---------- WORDS mode ---------- */
+  #choices.words{ gap:clamp(8px,2.2vw,20px); }
+  .choice.word{
+    width:min(43vw,300px);
+    height:auto;min-height:clamp(56px,11vh,104px);
+    padding:10px 14px;border-radius:22px;background:var(--panel);
+  }
+  .choice.word .w{
+    font-size:clamp(24px,6vw,50px);font-weight:900;letter-spacing:1px;
+    color:#1b1b1b;line-height:1.05;pointer-events:none;
+    word-break:break-word;
+  }
+  .choice.word .w .first{ color:#c0392b; }
+  /* the tile currently being read aloud */
+  .choice.word.saying{
+    transform:translateY(-2px);
+    box-shadow:0 0 0 5px #ffcc00, 0 8px 0 rgba(0,0,0,.25);
+  }
+  /* the prompt word gets the same cream card and the same red first letter
+     as the options below it, so the thing being matched looks like one
+     consistent cue rather than two different kinds of highlight */
+  .bigword{
+    display:inline-block;
+    font-size:clamp(28px,7.6vw,64px);font-weight:900;letter-spacing:2px;
+    color:#1b1b1b;line-height:1.1;text-shadow:none;
+    background:var(--panel);padding:4px 22px;border-radius:20px;
+    box-shadow:0 5px 0 rgba(0,0,0,.22);max-width:94vw;
+  }
+  .bigword .first{ color:#c0392b; }
+  .ask{
+    font-size:clamp(15px,3.8vw,28px);font-weight:900;color:#fff;
+    margin-top:2px;opacity:.95;
+  }
+  .ask .target{ padding:1px 12px; }
+
   /* ---------- things to count ---------- */
   #countBox{
     flex:0 0 auto;display:none;
@@ -280,6 +315,10 @@
     .bigbtn .lbl{font-size:clamp(15px,3.6vw,22px);}
     .grownup{margin-top:10px;}
     .hint{display:none;}
+    .choice.word{ min-height:46px;padding:6px 10px;border-radius:16px;width:min(40vw,230px); }
+    .choice.word .w{ font-size:clamp(17px,3.9vw,30px);letter-spacing:0; }
+    .bigword{ font-size:clamp(20px,5vw,36px);letter-spacing:1px;padding:2px 14px;border-radius:14px; }
+    .ask{ font-size:clamp(13px,3vw,20px); }
     #tower{gap:2px;margin-bottom:4px;}
     .floor{width:clamp(70px,18vw,140px);height:11px;border-width:2px;}
     .floor.cap{width:clamp(84px,21vw,160px);height:8px;}
@@ -311,6 +350,7 @@
       <button class="bigbtn" data-mode="colors"><span class="ico">🎨</span><span class="lbl">COLORS</span></button>
       <button class="bigbtn" data-mode="letters"><span class="ico">🔤</span><span class="lbl">LETTERS</span></button>
       <button class="bigbtn" data-mode="numbers"><span class="ico">🔢</span><span class="lbl">NUMBERS</span></button>
+      <button class="bigbtn" data-mode="words"><span class="ico">📖</span><span class="lbl">WORDS</span></button>
     </div>
     <div class="grownup">
       <button class="minibtn" id="voiceBtn" title="Change the speaking voice">🗣️ Voice: checking…</button>
@@ -364,6 +404,13 @@ var CONFIG = {
   BASE_CHOICES       : 3,      /* normal number of options — never fewer   */
   MAX_CHOICES        : 4,      /* options once an item is solid            */
   SAVE_PROGRESS      : true,   /* remember progress between sessions       */
+
+  /* ---- WORDS mode: "which word starts with the same letter?" ---- */
+  WORD_CHOICES       : 3,      /* 1 match + 2 others                       */
+  SHORT_WORD_BIAS    : 4,      /* how much to favour 3-4 letter words      */
+  WORD_CASE          : "upper",/* "upper" (CAT) or "lower" (cat)           */
+  HIGHLIGHT_FIRST_LETTER: true,/* colour the first letter of every word    */
+  READ_WORD_OPTIONS  : true,   /* read the four choices aloud, each in turn*/
   PREFERRED_VOICE_NAME: ""     /* force one exact voice by name            */
 };
 
@@ -489,6 +536,73 @@ var LETTER_SOUND = {
   Y:{sound:"yuh", word:"yellow"},  Z:{sound:"zzzz",word:"zip"}
 };
 
+/* Words for the WORDS mode: all 3-5 letters, concrete, and the kind of
+   thing a 4-year-old already has a picture of in their head. A letter needs
+   two words to be used as a TARGET (the prompt word and its match) and one
+   to appear as a distractor. U and X are left out on purpose — there is no
+   short, familiar, unambiguous child's word starting with either. */
+var WORDS = {
+  A:["ANT","ARM","APPLE"],      B:["BAT","BED","BUS","BALL","BEAR"],
+  C:["CAT","CUP","CAR","COW","CAKE"], D:["DOG","DUCK","DOOR","DOLL"],
+  E:["EGG","EAR","ELF"],        F:["FOX","FAN","FISH","FROG"],
+  G:["GOAT","GATE","GIRL","GUM"], H:["HAT","HEN","HAND","HOME"],
+  I:["ICE","INK","IRON"],       J:["JAM","JET","JUG","JEEP"],
+  K:["KEY","KITE","KING","KID"],L:["LEG","LOG","LION","LEAF"],
+  M:["MOP","MAP","MOON","MILK"],N:["NET","NEST","NOSE","NUT"],
+  O:["OWL","OVEN","OPEN"],      P:["PIG","PEN","POT","PAN"],
+  Q:["QUILT","QUEEN"],          R:["RAT","RUG","RING","RAIN"],
+  S:["SUN","SOCK","STAR","SIX"],T:["TOP","TREE","TOY","TEN"],
+  V:["VAN","VET","VASE"],       W:["WEB","WIG","WALL","WIND"],
+  Y:["YAK","YES","YARN"],       Z:["ZIP","ZOO","ZEBRA"]
+};
+var WORD_TARGET_LETTERS = [];   /* letters with >= 2 words  */
+var WORD_ANY_LETTERS    = [];   /* letters with >= 1 word   */
+(function(){
+  for(var k in WORDS){
+    if(!WORDS.hasOwnProperty(k)) continue;
+    if(WORDS[k].length >= 1) WORD_ANY_LETTERS.push(k);
+    if(WORDS[k].length >= 2) WORD_TARGET_LETTERS.push(k);
+  }
+  WORD_TARGET_LETTERS.sort(); WORD_ANY_LETTERS.sort();
+})();
+/* Short words are easier for a four-year-old to take in at a glance, so
+   3-4 letter words are picked far more often. It is a preference, not a
+   filter: longer words still turn up occasionally, and a letter whose only
+   words are long still works (Q has nothing shorter than QUEEN). */
+function wordWeight(w){ return w.length <= 4 ? Math.max(1, CONFIG.SHORT_WORD_BIAS) : 1; }
+function pickWordFrom(list){
+  var total = 0, i;
+  for(i=0;i<list.length;i++) total += wordWeight(list[i]);
+  var r = Math.random()*total, acc = 0;
+  for(i=0;i<list.length;i++){
+    acc += wordWeight(list[i]);
+    if(r <= acc) return list[i];
+  }
+  return list[list.length-1];
+}
+/* two different words from the same letter: one to show, one to find */
+function pickTwoWordsFrom(list){
+  var a = pickWordFrom(list);
+  var rest = [];
+  for(var i=0;i<list.length;i++){ if(list[i] !== a) rest.push(list[i]); }
+  if(!rest.length) return [a, a];
+  return [a, pickWordFrom(rest)];
+}
+
+function showWord(w){
+  return CONFIG.WORD_CASE === "lower" ? w.toLowerCase() : w.toUpperCase();
+}
+function showLetter(l){
+  return CONFIG.WORD_CASE === "lower" ? l.toLowerCase() : l.toUpperCase();
+}
+/* first letter picked out in red so the task is legible to a child who
+   cannot yet read the rest of the word */
+function wordMarkup(w){
+  var d = showWord(w);
+  if(!CONFIG.HIGHLIGHT_FIRST_LETTER) return '<span class="w">'+d+'</span>';
+  return '<span class="w"><span class="first">'+d.charAt(0)+'</span>'+d.slice(1)+'</span>';
+}
+
 var NUM_WORDS = ["zero","one","two","three","four","five","six","seven","eight",
                  "nine","ten","eleven","twelve","thirteen","fourteen","fifteen",
                  "sixteen","seventeen","eighteen","nineteen","twenty"];
@@ -521,7 +635,10 @@ var TIERS = [
    ============================================================ */
 var state = {
   mode:null,
-  roundType:"id",       /* "id" | "count" | "sound" */
+  roundType:"id",       /* "id" | "count" | "sound" | "word" */
+  statKey:null,         /* what progress is recorded against, if not target */
+  wordPair:null,        /* {prompt, match, letter} for a WORDS round        */
+  correctionParts:null, /* per-mode override for the wrong-answer wording   */
   target:null,
   sayParts:[],          /* what 🔁 replays */
   labelFor:null,
@@ -916,7 +1033,11 @@ function goMenu(){
   bumpSpeech();
   if(state.releaseLock){ state.releaseLock(); state.releaseLock=null; }
   state.mode=null; state.locked=false;
-  choicesEl.classList.remove("waiting");
+  /* tear the old board down rather than leaving it parked behind the menu */
+  choicesEl.classList.remove("waiting","four","words");
+  choicesEl.innerHTML="";
+  countBox.innerHTML=""; countBox.className="";
+  state.target=null; state.statKey=null; state.wordPair=null;
   cheerEl.classList.remove("on");
   towerEl.classList.remove("on"); towerEl.innerHTML="";
   truckEl.classList.remove("go"); truck2El.classList.remove("go");
@@ -1024,14 +1145,18 @@ function newRound(){
   choicesEl.innerHTML="";
   countBox.innerHTML="";
   countBox.className="";
+  choicesEl.classList.remove("words");
   state.roundType="id";
+  state.statKey=null;
+  state.correctionParts=null;
 
   if(state.mode==="colors")       buildColorRound();
   else if(state.mode==="letters") buildLetterRound();
+  else if(state.mode==="words")   buildWordRound();
   else                            buildNumberRound();
 
   var ms = modeStats(state.mode);
-  var st = itemStats(state.mode, state.target);
+  var st = itemStats(state.mode, state.statKey || state.target);
   st.seen++; st.lastRound = ms.rounds;
   ms.rounds++;
   ms.chanceSum += 1/state.choiceCount;
@@ -1041,10 +1166,12 @@ function newRound(){
 
 function renderTiles(values, opts){
   state.choiceCount = values.length;
-  if(values.length >= 4) choicesEl.classList.add("four");
+  /* word tiles are wide pills with their own sizing, so the generic
+     four-option shrink rule must not apply to them */
+  if(values.length >= 4 && opts.cls !== "word") choicesEl.classList.add("four");
   values.forEach(function(val,i){
     var b=document.createElement("button");
-    b.className="choice";
+    b.className="choice" + (opts.cls ? " "+opts.cls : "");
     b.dataset.val=val;
     if(opts.bg)        b.style.background = opts.bg(val,i);
     b.setAttribute("aria-label", opts.label ? opts.label(val) : String(val));
@@ -1136,6 +1263,111 @@ function buildLetterRound(){
     }
   });
   saySeq(state.sayParts);
+}
+
+/* ---------- WORDS ----------
+   Show one word and say it, then four more: one starting with the same
+   letter, three starting with different ones. The first letter of every
+   word is picked out in colour, because a four-year-old cannot read the
+   rest of it — the job is to match that letter, with the word giving it
+   meaning and a sound. Progress is recorded against the LETTER, so the
+   panel tells you which starting letters he is missing. */
+function buildWordRound(){
+  var letter = chooseTarget("words", WORD_TARGET_LETTERS, state.lastTarget);
+  state.lastTarget = letter;
+  state.statKey = letter;
+  state.roundType = "word";
+
+  var pair = pickTwoWordsFrom(WORDS[letter]);
+  var promptWord = pair[0], matchWord = pair[1];
+
+  /* distractor letters: not the target, not each other, and not something
+     that merely LOOKS like the target — a miss should mean "didn't know",
+     not "couldn't tell C from G at a glance" */
+  var want = Math.max(2, CONFIG.WORD_CHOICES) - 1;
+  var others = [], guard = 0;
+  while(others.length < want && guard < 900){
+    guard++;
+    var cand = pick(WORD_ANY_LETTERS);
+    if(cand === letter || others.indexOf(cand) > -1) continue;
+    if(looksAlike(cand, letter, LOOK_UPPER)) continue;
+    var clash = false;
+    for(var i=0;i<others.length;i++){ if(looksAlike(cand, others[i], LOOK_UPPER)) clash = true; }
+    if(clash) continue;
+    others.push(cand);
+  }
+  while(others.length < want){                       /* safety net */
+    var f = pick(WORD_ANY_LETTERS);
+    if(f !== letter && others.indexOf(f) === -1) others.push(f);
+    else break;
+  }
+
+  var set = [matchWord];
+  others.forEach(function(L){ set.push(pickWordFrom(WORDS[L])); });
+  set = shuffle(set);
+
+  state.target = matchWord;
+  var shownLetter = showLetter(letter);
+
+  promptEl.innerHTML = '<div class="bigword">'+
+      (CONFIG.HIGHLIGHT_FIRST_LETTER
+        ? '<span class="first">'+showWord(promptWord).charAt(0)+'</span>'+showWord(promptWord).slice(1)
+        : showWord(promptWord))+
+    '</div>'+
+    '<div class="ask">Which word also starts with <span class="target">'+shownLetter+'</span>?</div>';
+
+  state.sayParts = [
+    {text: promptWord + ".", gap: 420},
+    {text: "Which word also starts with " + letter + "?"}
+  ];
+  state.retryParts = [{text:"Find the word that starts with " + letter + "."}];
+  state.successLabel = matchWord;
+  state.labelFor = function(val){ return String(val); };
+  /* naming the wrong word AND its letter is the whole teaching moment here */
+  state.correctionParts = function(val){
+    var w = String(val);
+    return [
+      {text:"That's " + w + ".", gap:260},
+      {text:w + " starts with " + w.charAt(0) + ".", gap:CORRECTION_GAP_MS}
+    ].concat(state.retryParts);
+  };
+  state.wordPair = {prompt:promptWord, match:matchWord, letter:letter};
+
+  renderTiles(set, {
+    bg: function(){ return "#fff8e7"; },
+    label: function(v){ return String(v); },
+    inner: function(v){ return wordMarkup(v); },
+    cls: "word"
+  });
+  choicesEl.classList.add("words");
+
+  saySeq(state.sayParts, function(){
+    if(CONFIG.READ_WORD_OPTIONS) readOptionsAloud();
+  });
+}
+
+/* Read the four choices in turn, each tile lighting up as it is said, so a
+   child who cannot read still hears what every option is. The board stays
+   unlocked throughout — if he already knows, he should not have to wait. */
+function readOptionsAloud(){
+  var g = speechGen;
+  var tiles = [], kids = choicesEl.children, i;
+  for(i=0;i<kids.length;i++) tiles.push(kids[i]);
+  var n = 0;
+  function step(){
+    if(g !== speechGen) return;
+    if(n >= tiles.length) return;
+    var tile = tiles[n];
+    var word = tile ? tile.dataset.val : "";
+    n++;
+    if(tile) tile.classList.add("saying");
+    say(word, function(){
+      if(tile) tile.classList.remove("saying");
+      if(g !== speechGen) return;
+      later(step, 180);
+    });
+  }
+  step();
 }
 
 /* ---------- NUMBERS ---------- */
@@ -1254,10 +1486,12 @@ function repeatPrompt(){
    ============================================================ */
 function onPick(ev){
   if(state.locked) return;
+  /* he answered — stop whatever is still being read out */
+  bumpSpeech();
   var btn = ev.currentTarget;
   var val = btn.dataset.val;
   var ms  = modeStats(state.mode);
-  var st  = itemStats(state.mode, state.target);
+  var st  = itemStats(state.mode, state.statKey || state.target);
 
   if(val !== state.target){
     state.missesThisRound++;
@@ -1272,9 +1506,14 @@ function onPick(ev){
        exposure — he hears "that's B" while looking straight at a B. The
        pause between that and the re-ask is deliberate; run together they
        are one unintelligible blur at this age. */
-    var named = state.labelFor ? state.labelFor(val) : String(val);
-    var parts = [{text:"That's " + named + ".", gap:CORRECTION_GAP_MS}]
-                  .concat(state.retryParts);
+    var parts;
+    if(state.correctionParts){
+      parts = state.correctionParts(val);
+    } else {
+      var named = state.labelFor ? state.labelFor(val) : String(val);
+      parts = [{text:"That's " + named + ".", gap:CORRECTION_GAP_MS}]
+                .concat(state.retryParts);
+    }
 
     /* Missed twice on the same item? Quietly take one wrong option away so
        he can finish on a success rather than spiral. */
@@ -1318,9 +1557,18 @@ function onPick(ev){
      counting round the naming is left to countAloud, which ends on the
      total, so it isn't said twice. */
   var counting = (state.roundType === "count");
-  var seq = counting
-    ? [{text:nextPraise(), gap:PRAISE_GAP_MS}, {text:"Let's count them."}]
-    : [{text:nextPraise(), gap:PRAISE_GAP_MS}, {text:state.successLabel + "."}];
+  var seq;
+  if(counting){
+    seq = [{text:nextPraise(), gap:PRAISE_GAP_MS}, {text:"Let's count them."}];
+  } else if(state.roundType === "word" && state.wordPair){
+    /* spell out WHY it was right — the shared sound is the lesson */
+    seq = [{text:nextPraise(), gap:PRAISE_GAP_MS},
+           {text:state.wordPair.match + ".", gap:260},
+           {text:state.wordPair.prompt + " and " + state.wordPair.match +
+                 " both start with " + state.wordPair.letter + "."}];
+  } else {
+    seq = [{text:nextPraise(), gap:PRAISE_GAP_MS}, {text:state.successLabel + "."}];
+  }
 
   var budget = estimate(seq) + (counting ? state.countCells.length*1300 + 3000 : 0) + 6000;
   var hardStop = setTimeout(advance, budget);
@@ -1480,7 +1728,8 @@ function confetti(n){
 /* ============================================================
    PROGRESS PANEL
    ============================================================ */
-var MODE_LABEL = {colors:"🎨 Colors", letters:"🔤 Letters", numbers:"🔢 Numbers"};
+var MODE_LABEL = {colors:"🎨 Colors", letters:"🔤 Letters", numbers:"🔢 Numbers",
+                  words:"📖 Words — starting letters"};
 var DAY_NAMES = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
 function prettyDay(key){
   var bits = key.split("-");
@@ -1490,7 +1739,7 @@ function prettyDay(key){
   return DAY_NAMES[d.getDay()] + " " + (+bits[2]) + "/" + (+bits[1]);
 }
 function renderProgress(){
-  var modes = ["colors","letters","numbers"], html = "", any = false;
+  var modes = ["colors","letters","numbers","words"], html = "", any = false;
 
   /* today first — it's the question a parent actually has */
   var t = days[todayKey()];
@@ -1690,6 +1939,15 @@ window.__game = {
     COUNTABLES.forEach(function(v){ out.push(v.emo); });
     SIGN_CAPS.forEach(function(c){ out.push(c); });
     TIERS.forEach(function(t){ t.emo.forEach(function(e){ out.push(e); }); if(t.top) out.push(t.top); });
+    return out;
+  },
+  wordPair: function(){ return state.wordPair; },
+  wordLetters: function(){ return {targets:WORD_TARGET_LETTERS, any:WORD_ANY_LETTERS}; },
+  pickWordFrom: pickWordFrom,
+  allWords: function(){ return WORDS; },
+  optionWords: function(){
+    var out=[], k=choicesEl.children;
+    for(var i=0;i<k.length;i++) out.push(k[i].dataset.val);
     return out;
   },
   praisePool: PRAISE,
